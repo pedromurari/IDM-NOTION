@@ -88,8 +88,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .board-col{min-width:278px;width:278px;background:var(--surface);border-radius:10px;padding:12px;flex-shrink:0}
 .bcol-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:2px 0}
 .bcol-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.bcol-title{font-weight:700;font-size:13px;flex:1;cursor:default}
-.bcol-title[contenteditable="true"]{cursor:text;outline:none;border-bottom:1px solid var(--accent)}
+.bcol-title{font-weight:700;font-size:13px;flex:1;cursor:pointer;border-radius:4px;padding:2px 4px;margin:-2px -4px;transition:background .12s}
+.bcol-title:hover{background:rgba(0,0,0,.06)}
+.bcol-title[contenteditable="true"]{cursor:text;outline:none;background:rgba(99,102,241,.1);color:var(--accent);border-radius:4px}
+.bcol-head{cursor:grab;user-select:none}
+.bcol-head:active{cursor:grabbing}
+.bcol-drag-hint{font-size:13px;color:var(--text-3);opacity:0;transition:opacity .15s;margin-right:2px;flex-shrink:0}
+.board-col:hover .bcol-drag-hint{opacity:1}
+.board-col.col-dragging{opacity:.35;cursor:grabbing}
+.board-col.col-drop-left{border-left:3px solid var(--accent)}
+.board-col.col-drop-right{border-right:3px solid var(--accent)}
 .bcol-count{font-size:11.5px;color:var(--text-3);background:rgba(0,0,0,.06);padding:1px 8px;border-radius:10px}
 .bcol-menu{opacity:0;cursor:pointer;color:var(--text-3);font-size:16px;padding:2px 5px;border-radius:4px;transition:opacity .15s;user-select:none}
 .board-col:hover .bcol-menu{opacity:1}
@@ -474,8 +482,8 @@ textarea.finput{resize:vertical;min-height:76px}
     <select class="fsel" id="f-area" onchange="applyFilters()">
       <option value="">Todas as empresas</option>
       <option value="idm">IDM</option>
-      <option value="despertamente">Despertamente</option>
-      <option value="geral">Geral</option>
+      <option value="npa-presencial">NPA Presencial</option>
+      <option value="npa-7esferas">NPA 7 Esferas 2.0</option>
     </select>
     <button class="btn btn-ghost" onclick="clearFilters()" style="margin-left:auto">✕ Limpar</button>
   </div>
@@ -561,8 +569,8 @@ textarea.finput{resize:vertical;min-height:76px}
         <label class="flabel">Empresa / Área</label>
         <select class="fsel" id="t-area">
           <option value="idm">🏛️ IDM (Instituto)</option>
-          <option value="despertamente">⚡ Despertamente</option>
-          <option value="geral">🌐 Geral</option>
+          <option value="npa-presencial">🎪 NPA Presencial</option>
+          <option value="npa-7esferas">🔮 NPA 7 Esferas 2.0</option>
         </select>
       </div>
 
@@ -736,11 +744,11 @@ const DEFAULT_STATE = {
   tasks: [
     {id:'t1',title:'Preparar material da Turma 31',desc:'Slides, planilhas e roteiro das aulas',status:'doing',priority:'alta',assignee:'pedro',area:'idm',category:'turmas',period:'semanal',due:'2026-04-18',tags:['turma31','conteudo'],createdAt:Date.now()-86400000*2},
     {id:'t2',title:'Criar posts para Instagram — semana IDM',desc:'5 posts para o feed + 3 stories',status:'todo',priority:'media',assignee:'vinicius',area:'idm',category:'social',period:'semanal',due:'2026-04-17',tags:['instagram','design'],createdAt:Date.now()-86400000},
-    {id:'t3',title:'Revisar funil de vendas do curso',desc:'Testar cada etapa do funil e corrigir',status:'review',priority:'urgente',assignee:'igor',area:'despertamente',category:'vendas',period:'projeto',due:'2026-04-14',tags:['funnel','vendas'],createdAt:Date.now()-86400000*3},
+    {id:'t3',title:'Revisar funil de vendas do curso',desc:'Testar cada etapa do funil e corrigir',status:'review',priority:'urgente',assignee:'igor',area:'npa-7esferas',category:'vendas',period:'projeto',due:'2026-04-14',tags:['funnel','vendas'],createdAt:Date.now()-86400000*3},
     {id:'t4',title:'Live de lançamento da turma',desc:'Roteiro, cenário e promoção',status:'todo',priority:'alta',assignee:'pedro',area:'idm',category:'lives',period:'mensal',due:'2026-05-02',tags:['live','lancamento'],createdAt:Date.now()-3600000*5},
-    {id:'t5',title:'Atualizar planilha financeira',desc:'Receitas e despesas de março',status:'done',priority:'media',assignee:'rodrygo',area:'geral',category:'financeiro',period:'mensal',due:'2026-04-10',tags:['financas'],createdAt:Date.now()-86400000*5},
+    {id:'t5',title:'Atualizar planilha financeira',desc:'Receitas e despesas de março',status:'done',priority:'media',assignee:'rodrygo',area:'idm',category:'financeiro',period:'mensal',due:'2026-04-10',tags:['financas'],createdAt:Date.now()-86400000*5},
     {id:'t6',title:'Responder chamados de suporte',desc:'Responder tickets pendentes no grupo',status:'doing',priority:'alta',assignee:'vinicius',area:'idm',category:'suporte',period:'diario',due:'2026-04-13',tags:['suporte','alunos'],createdAt:Date.now()-3600000},
-    {id:'t7',title:'Tráfego pago — análise de campanha',desc:'Revisar métricas e ajustar criativos',status:'todo',priority:'alta',assignee:'igor',area:'despertamente',category:'trafego',period:'semanal',due:'2026-04-16',tags:['ads','facebook'],createdAt:Date.now()-86400000*1},
+    {id:'t7',title:'Tráfego pago — análise de campanha',desc:'Revisar métricas e ajustar criativos',status:'todo',priority:'alta',assignee:'igor',area:'npa-presencial',category:'trafego',period:'semanal',due:'2026-04-16',tags:['ads','facebook'],createdAt:Date.now()-86400000*1},
   ],
   boardColumns: [
     {id:'todo',name:'A Fazer',color:'#6b7280'},
@@ -789,6 +797,7 @@ let currentTags = [];
 let currentDetailId = null;
 let ctxTaskId = null;
 let dragTaskId = null;
+let dragColId = null;
 
 function loadState(){
   try{
@@ -1036,9 +1045,10 @@ function renderBoard(){
     div.className = 'board-col';
     div.dataset.colId = col.id;
     div.innerHTML = `
-    <div class="bcol-head">
-      <div class="bcol-dot" style="background:${col.color}"></div>
-      <div class="bcol-title" id="bct-${col.id}">${esc(col.name)}</div>
+    <div class="bcol-head" title="Arraste para reordenar a coluna">
+      <span class="bcol-drag-hint">⠿</span>
+      <div class="bcol-dot" style="background:${col.color};cursor:pointer" onclick="openColColorPicker(event,'${col.id}')" title="Mudar cor"></div>
+      <div class="bcol-title" id="bct-${col.id}" onclick="startEditColName(event,'${col.id}')" title="Clique para renomear">${esc(col.name)}</div>
       <div class="bcol-count">${colTasks.length}</div>
       <div class="bcol-menu" onclick="colMenu(event,'${col.id}')">···</div>
     </div>
@@ -1048,7 +1058,71 @@ function renderBoard(){
     </div>
     <button class="add-card-btn" onclick="quickAdd('${col.id}')">+ Adicionar tarefa</button>`;
     el.appendChild(div);
-    setupDrop(div, col.id);
+
+    // ── Column drag (from header) ──
+    const head = div.querySelector('.bcol-head');
+    head.draggable = true;
+    head.addEventListener('dragstart', e=>{
+      if(e.target.closest('.task-card')) return;
+      dragColId = col.id;
+      dragTaskId = null;
+      setTimeout(()=>div.classList.add('col-dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'col:'+col.id);
+    });
+    head.addEventListener('dragend', ()=>{
+      div.classList.remove('col-dragging');
+      dragColId = null;
+      document.querySelectorAll('.board-col').forEach(c=>c.classList.remove('col-drop-left','col-drop-right','drag-over'));
+    });
+
+    // ── Card & Column drop target ──
+    div.addEventListener('dragover', e=>{
+      e.preventDefault();
+      if(dragColId && dragColId !== col.id){
+        document.querySelectorAll('.board-col').forEach(c=>c.classList.remove('col-drop-left','col-drop-right'));
+        const rect = div.getBoundingClientRect();
+        const mid = rect.left + rect.width/2;
+        if(e.clientX < mid) div.classList.add('col-drop-left');
+        else div.classList.add('col-drop-right');
+      } else if(dragTaskId){
+        div.classList.add('drag-over');
+      }
+    });
+    div.addEventListener('dragleave', e=>{
+      if(!div.contains(e.relatedTarget)){
+        div.classList.remove('col-drop-left','col-drop-right','drag-over');
+      }
+    });
+    div.addEventListener('drop', e=>{
+      e.preventDefault();
+      const wasLeft = div.classList.contains('col-drop-left');
+      div.classList.remove('col-drop-left','col-drop-right','drag-over');
+
+      if(dragColId && dragColId !== col.id){
+        // Reorder columns
+        const fromIdx = state.boardColumns.findIndex(c=>c.id===dragColId);
+        let toIdx = state.boardColumns.findIndex(c=>c.id===col.id);
+        if(fromIdx >= 0 && toIdx >= 0){
+          const [moved] = state.boardColumns.splice(fromIdx, 1);
+          toIdx = state.boardColumns.findIndex(c=>c.id===col.id);
+          const insertAt = wasLeft ? toIdx : toIdx+1;
+          state.boardColumns.splice(insertAt, 0, moved);
+          saveState();
+          renderBoard();
+        }
+        dragColId = null;
+      } else if(dragTaskId){
+        const task = state.tasks.find(t=>t.id===dragTaskId);
+        if(task && task.status !== col.id){
+          task.status = col.id;
+          saveState();
+          toast(`Movido para "${col.name}"`);
+          renderBoard();
+        }
+        dragTaskId = null;
+      }
+    });
   });
 
   // Add column button
@@ -1062,9 +1136,12 @@ function renderBoard(){
   document.querySelectorAll('.task-card').forEach(card=>{
     card.draggable = true;
     card.addEventListener('dragstart', e=>{
+      e.stopPropagation();
       dragTaskId = card.dataset.taskId;
+      dragColId = null;
       card.classList.add('dragging');
-      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'card:'+card.dataset.taskId);
     });
     card.addEventListener('dragend', ()=>card.classList.remove('dragging'));
     card.addEventListener('contextmenu', e=>{
@@ -1072,6 +1149,120 @@ function renderBoard(){
       showCtx(e, card.dataset.taskId);
     });
   });
+}
+
+// ── INLINE COLUMN NAME EDIT ────────────────────────────────────────────────
+function startEditColName(e, colId){
+  e.stopPropagation();
+  const el = document.getElementById('bct-'+colId);
+  if(!el || el.contentEditable === 'true') return;
+  el.contentEditable = 'true';
+  el.focus();
+  // Select all
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  const save = ()=>{
+    const name = el.textContent.trim();
+    el.contentEditable = 'false';
+    if(name){
+      const col = state.boardColumns.find(c=>c.id===colId);
+      if(col && col.name !== name){ col.name = name; saveState(); toast('✅ Coluna renomeada'); }
+    } else {
+      const col = state.boardColumns.find(c=>c.id===colId);
+      if(col) el.textContent = col.name;
+    }
+  };
+  el.onblur = save;
+  el.onkeydown = (ev)=>{
+    if(ev.key==='Enter'){ ev.preventDefault(); el.blur(); }
+    if(ev.key==='Escape'){
+      const col = state.boardColumns.find(c=>c.id===colId);
+      if(col) el.textContent = col.name;
+      el.contentEditable = 'false';
+    }
+  };
+}
+
+// ── INLINE COLOR PICKER ────────────────────────────────────────────────────
+const COL_COLORS = ['#6b7280','#3b82f6','#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#14b8a6','#84cc16'];
+
+function openColColorPicker(e, colId){
+  e.stopPropagation();
+  document.getElementById('col-cpicker')?.remove();
+  const col = state.boardColumns.find(c=>c.id===colId);
+  if(!col) return;
+
+  const picker = document.createElement('div');
+  picker.id = 'col-cpicker';
+  const rect = e.target.getBoundingClientRect();
+  picker.style.cssText = `position:fixed;z-index:8000;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;box-shadow:0 8px 28px rgba(0,0,0,.18);display:flex;flex-wrap:wrap;gap:8px;width:180px;left:${rect.left}px;top:${rect.bottom+6}px`;
+
+  COL_COLORS.forEach(clr=>{
+    const dot = document.createElement('div');
+    dot.style.cssText = `width:24px;height:24px;border-radius:50%;background:${clr};cursor:pointer;border:3px solid ${col.color===clr?'#1a1a1a':'transparent'};transition:transform .1s,border .1s;flex-shrink:0`;
+    dot.title = clr;
+    dot.onmouseover = ()=>dot.style.transform='scale(1.25)';
+    dot.onmouseout = ()=>dot.style.transform='scale(1)';
+    dot.onclick = ()=>{
+      col.color = clr;
+      saveState();
+      renderBoard();
+      picker.remove();
+    };
+    picker.appendChild(dot);
+  });
+
+  document.body.appendChild(picker);
+  setTimeout(()=>{
+    const close = ()=>{ picker.remove(); document.removeEventListener('click', close); };
+    document.addEventListener('click', close);
+  }, 10);
+}
+
+// ── COLUMN CONTEXT MENU ────────────────────────────────────────────────────
+function colMenu(e, colId){
+  e.stopPropagation();
+  document.getElementById('col-cpicker')?.remove();
+
+  const menu = document.createElement('div');
+  menu.id = 'col-menu-pop';
+  const rect = e.target.getBoundingClientRect();
+  menu.style.cssText = `position:fixed;z-index:8000;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:170px;left:${rect.left}px;top:${rect.bottom+4}px`;
+
+  const items = [
+    {label:'✏️ Renomear', fn:()=>{ document.getElementById('bct-'+colId)?.click(); }},
+    {label:'🎨 Mudar cor', fn:()=>{ const dot = document.querySelector(`[data-col-id="${colId}"] .bcol-dot`)||document.querySelector(`#bct-${colId}`)?.closest('.bcol-head')?.querySelector('.bcol-dot'); if(dot) dot.click(); }},
+    {label:'➕ Adicionar tarefa', fn:()=>quickAdd(colId)},
+    {divider:true},
+    {label:'🗑️ Excluir coluna', danger:true, fn:()=>{
+      if(state.boardColumns.length<=2){ toast('⚠️ Mínimo de 2 colunas'); return; }
+      const n = state.tasks.filter(t=>t.status===colId).length;
+      if(n>0 && !confirm(`Esta coluna tem ${n} tarefa(s). Excluir mesmo assim? As tarefas ficarão no status "${colId}".`)) return;
+      state.boardColumns = state.boardColumns.filter(c=>c.id!==colId);
+      saveState(); renderBoard(); toast('Coluna excluída');
+    }},
+  ];
+
+  items.forEach(item=>{
+    if(item.divider){ const d=document.createElement('div'); d.style.cssText='height:1px;background:#f0f0ef;margin:4px 0'; menu.appendChild(d); return; }
+    const btn = document.createElement('div');
+    btn.style.cssText = `padding:8px 13px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;color:${item.danger?'#dc2626':'inherit'}`;
+    btn.textContent = item.label;
+    btn.onmouseover = ()=>btn.style.background=item.danger?'#fee2e2':'#f7f7f5';
+    btn.onmouseout = ()=>btn.style.background='transparent';
+    btn.onclick = ()=>{ menu.remove(); item.fn(); };
+    menu.appendChild(btn);
+  });
+
+  document.body.appendChild(menu);
+  setTimeout(()=>{
+    const close = ()=>{ menu.remove(); document.removeEventListener('click', close); };
+    document.addEventListener('click', close);
+  }, 10);
 }
 
 function cardHTML(t){
@@ -1092,28 +1283,6 @@ function cardHTML(t){
     ${t.due?`<div class="card-due${isOverdue?' overdue':''}">📅 ${formatDate(t.due)}</div>`:''}
   </div>
 </div>`;
-}
-
-function setupDrop(colEl, colId){
-  colEl.addEventListener('dragover', e=>{
-    e.preventDefault();
-    colEl.classList.add('drag-over');
-  });
-  colEl.addEventListener('dragleave', ()=>colEl.classList.remove('drag-over'));
-  colEl.addEventListener('drop', e=>{
-    e.preventDefault();
-    colEl.classList.remove('drag-over');
-    if(dragTaskId){
-      const task = state.tasks.find(t=>t.id===dragTaskId);
-      if(task && task.status !== colId){
-        task.status = colId;
-        saveState();
-        toast(`Movido para "${state.boardColumns.find(c=>c.id===colId)?.name||colId}"`);
-        renderBoard();
-      }
-    }
-    dragTaskId = null;
-  });
 }
 
 function quickAdd(status){
@@ -1503,7 +1672,7 @@ function exportData(){
 function statusLabel(s){return{todo:'A Fazer',doing:'Em Andamento',review:'Em Revisão',done:'Concluído',blocked:'Bloqueado'}[s]||s}
 function priorityLabel(p){return{baixa:'Baixa',media:'Média',alta:'Alta',urgente:'🔴 Urgente'}[p]||p}
 function periodLabel(p){return{diario:'Diário',semanal:'Semanal',mensal:'Mensal',projeto:'Projeto'}[p]||p}
-function areaLabel(a){return{idm:'🏛️ IDM',despertamente:'⚡ Despertamente',geral:'🌐 Geral'}[a]||a}
+function areaLabel(a){return{idm:'🏛️ IDM - Instituto Despertamente','npa-presencial':'🎪 NPA Presencial','npa-7esferas':'🔮 NPA 7 Esferas 2.0'}[a]||a}
 function catLabel(c){return{turmas:'📚 Turmas',lives:'🎥 Lives',conteudo:'✍️ Conteúdo',produto:'🛠️ Produto',marketing:'📣 Marketing',social:'📱 Social',vendas:'💰 Vendas',trafego:'🎯 Tráfego',suporte:'🤝 Suporte',financeiro:'💳 Financeiro',operacional:'⚙️ Operacional',estrategia:'🧠 Estratégia'}[c]||c}
 function capitalize(s){return s?s[0].toUpperCase()+s.slice(1):''}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -1662,8 +1831,8 @@ function renderIdeas(){
           <label class="flabel">Empresa</label>
           <select class="fsel" id="idea-area">
             <option value="idm">🏛️ IDM</option>
-            <option value="despertamente">⚡ Despertamente</option>
-            <option value="geral">🌐 Geral</option>
+            <option value="npa-presencial">🎪 NPA Presencial</option>
+            <option value="npa-7esferas">🔮 NPA 7 Esferas 2.0</option>
           </select>
         </div>
         <div class="fgroup">
@@ -1771,7 +1940,7 @@ async function analyzeIdea(){
 Analise a ideia do empreendedor e gere um playbook de ação completo e detalhado.
 SEMPRE responda em JSON válido, sem texto antes ou depois.
 Escreva em português brasileiro, de forma prática e direta.
-O playbook deve ser acionável e específico para o contexto de uma empresa de cursos online/educação (IDM / Instituto Despertamente).
+O playbook deve ser acionável e específico para o contexto de uma empresa de cursos online/educação. Empresas do grupo: IDM (Instituto Despertamente), NPA Presencial, NPA 7 Esferas 2.0.
 Contexto da empresa: Empresa de cursos online de desenvolvimento pessoal/despertar da consciência. Equipe: Pedro (estratégia/produto), Igor (tráfego/marketing), Vinicius (suporte/comunidade), Rodrygo (financeiro/operacional).`;
 
   const userPrompt = `IDEIA DO EMPREENDEDOR:
