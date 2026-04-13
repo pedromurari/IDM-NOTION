@@ -93,8 +93,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .bcol-title[contenteditable="true"]{cursor:text;outline:none;background:rgba(99,102,241,.1);color:var(--accent);border-radius:4px}
 .bcol-head{cursor:grab;user-select:none}
 .bcol-head:active{cursor:grabbing}
-.bcol-drag-hint{font-size:13px;color:var(--text-3);opacity:0;transition:opacity .15s;margin-right:2px;flex-shrink:0}
+.bcol-drag-hint{font-size:15px;color:var(--text-3);opacity:0;transition:opacity .15s;margin-right:2px;flex-shrink:0;cursor:grab;padding:2px 3px;border-radius:4px;line-height:1}
+.bcol-drag-hint:active{cursor:grabbing}
 .board-col:hover .bcol-drag-hint{opacity:1}
+.bcol-drag-hint:hover{background:rgba(0,0,0,.08);color:var(--text-2)}
 .board-col.col-dragging{opacity:.35;cursor:grabbing}
 .board-col.col-drop-left{border-left:3px solid var(--accent)}
 .board-col.col-drop-right{border-right:3px solid var(--accent)}
@@ -253,15 +255,76 @@ textarea.finput{resize:vertical;min-height:76px}
 ::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:#9ca3af}
 
+/* ── MOBILE NAV ── */
+#mobile-nav{display:none}
+#mob-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900}
+#mob-sidebar-overlay.open{display:block}
+#sidebar.mob-open{transform:translateX(0)!important}
+.mob-hamburger{display:none;width:36px;height:36px;border:none;background:var(--surface);border-radius:8px;font-size:18px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
-  #sidebar{display:none}
-  #ph,#filter-bar,#page-content{padding-left:16px;padding-right:16px}
+  /* Sidebar becomes slide-in drawer */
+  #sidebar{position:fixed;top:0;left:0;z-index:950;transform:translateX(-100%);transition:transform .25s;height:100vh;overflow-y:auto}
+  #sidebar.mob-open{transform:translateX(0)}
+
+  /* Header */
+  #ph{padding:14px 14px 0}
+  .mob-hamburger{display:flex}
+  #page-title{font-size:18px}
+  .ph-actions .btn-ghost{display:none}
+
+  /* Filter bar */
+  #filter-bar{padding:8px 12px;gap:6px;overflow-x:auto;flex-wrap:nowrap}
+  .filter-label{display:none}
+  .fsel{font-size:11.5px;padding:3px 6px}
+
+  /* Content */
+  #page-content{padding:12px}
+
+  /* Board — horizontal scroll */
+  #board-view.active{padding:0 0 12px;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .board-col{min-width:260px;width:260px}
+
+  /* Dashboard */
   .stats-grid{grid-template-columns:1fr 1fr}
-  #goals-view.active{grid-template-columns:1fr}
   .person-cols{grid-template-columns:1fr 1fr}
+  #dashboard-view .dash-section [style*="grid-template-columns:repeat(4"]{grid-template-columns:1fr 1fr!important}
+
+  /* Goals */
+  #goals-view.active{grid-template-columns:1fr}
+
+  /* Table */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.dtable th:nth-child(n+5),table.dtable td:nth-child(n+5){display:none}
+
+  /* Modal */
+  .modal,.modal-lg{width:96vw;margin:0 auto;max-height:92vh}
   .form-grid{grid-template-columns:1fr}
-  .full{grid-column:1}
+  .full,.fsec{grid-column:1}
+
+  /* Ideas */
+  .ideas-meta-row{grid-template-columns:1fr}
+  #goals-view.active{grid-template-columns:1fr}
+
+  /* Bottom nav */
+  #mobile-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;
+    background:#fff;border-top:1px solid var(--border);
+    z-index:800;padding:6px 0 env(safe-area-inset-bottom,0);
+    box-shadow:0 -2px 12px rgba(0,0,0,.08)
+  }
+  #mobile-nav .mnav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:6px 4px;cursor:pointer;color:var(--text-3);font-size:10.5px;
+    font-weight:500;transition:color .15s;border:none;background:transparent;
+    font-family:inherit
+  }
+  #mobile-nav .mnav-item .mico{font-size:20px;line-height:1}
+  #mobile-nav .mnav-item.active{color:var(--accent)}
+  #mobile-nav .mnav-item.active .mico{filter:drop-shadow(0 0 4px rgba(99,102,241,.5))}
+  #page-content{padding-bottom:72px}
+  #filter-bar{margin-bottom:0}
 }
 
 /* ── EMPTY STATE ── */
@@ -435,6 +498,7 @@ textarea.finput{resize:vertical;min-height:76px}
   <!-- PAGE HEADER -->
   <div id="ph">
     <div class="ph-top">
+      <button class="mob-hamburger" onclick="toggleMobileSidebar()">☰</button>
       <div class="ph-icon" id="page-icon" onclick="pickIcon()">📊</div>
       <input id="page-title" value="Dashboard" spellcheck="false" onblur="savePageTitle(this.value)">
       <div class="ph-actions">
@@ -719,6 +783,18 @@ textarea.finput{resize:vertical;min-height:76px}
 </div>
 </div>
 
+<!-- MOBILE OVERLAY -->
+<div id="mob-sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav id="mobile-nav">
+  <button class="mnav-item active" id="mnav-dashboard" onclick="nav('dashboard')"><span class="mico">📊</span>Dashboard</button>
+  <button class="mnav-item" id="mnav-board" onclick="nav('board')"><span class="mico">📋</span>Kanban</button>
+  <button class="mnav-item" id="mnav-table" onclick="nav('table')"><span class="mico">📑</span>Tabela</button>
+  <button class="mnav-item" id="mnav-goals" onclick="nav('goals')"><span class="mico">🎯</span>Metas</button>
+  <button class="mnav-item" id="mnav-ideas" onclick="nav('ideas')"><span class="mico">💡</span>Ideias</button>
+</nav>
+
 <!-- CONTEXT MENU -->
 <div id="ctx">
   <div class="ctx-item" onclick="ctxEdit()">✏️ Editar</div>
@@ -838,10 +914,16 @@ function nav(page){
   saveState();
 
   // update sidebar
-  document.querySelectorAll('.sb-item').forEach(el=>{
-    el.classList.toggle('active', el.id === 'nav-'+page || (page==='board'&&el.id==='nav-board') || (page==='table'&&el.id==='nav-table'));
-  });
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
   document.getElementById('nav-'+page)?.classList.add('active');
+
+  // update mobile bottom nav
+  document.querySelectorAll('.mnav-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('mnav-'+page)?.classList.add('active');
+
+  // close mobile sidebar if open
+  document.getElementById('sidebar')?.classList.remove('mob-open');
+  document.getElementById('mob-sidebar-overlay')?.classList.remove('open');
 
   // update page header
   document.getElementById('page-icon').textContent = state.pageIcons[page]||'📄';
@@ -892,6 +974,14 @@ function pickIcon(){
   document.getElementById('page-icon').textContent = next;
   state.pageIcons[state.currentPage] = next;
   saveState();
+}
+
+function toggleMobileSidebar(){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('mob-sidebar-overlay');
+  const isOpen = sb.classList.contains('mob-open');
+  sb.classList.toggle('mob-open', !isOpen);
+  ov.classList.toggle('open', !isOpen);
 }
 
 function setUser(val){
@@ -1045,10 +1135,10 @@ function renderBoard(){
     div.className = 'board-col';
     div.dataset.colId = col.id;
     div.innerHTML = `
-    <div class="bcol-head" title="Arraste para reordenar a coluna">
-      <span class="bcol-drag-hint">⠿</span>
+    <div class="bcol-head">
+      <span class="bcol-drag-hint" title="Arraste para mover a coluna" draggable="true">⠿</span>
       <div class="bcol-dot" style="background:${col.color};cursor:pointer" onclick="openColColorPicker(event,'${col.id}')" title="Mudar cor"></div>
-      <div class="bcol-title" id="bct-${col.id}" onclick="startEditColName(event,'${col.id}')" title="Clique para renomear">${esc(col.name)}</div>
+      <div class="bcol-title" id="bct-${col.id}" title="Clique para renomear">${esc(col.name)}</div>
       <div class="bcol-count">${colTasks.length}</div>
       <div class="bcol-menu" onclick="colMenu(event,'${col.id}')">···</div>
     </div>
@@ -1059,18 +1149,20 @@ function renderBoard(){
     <button class="add-card-btn" onclick="quickAdd('${col.id}')">+ Adicionar tarefa</button>`;
     el.appendChild(div);
 
-    // ── Column drag (from header) ──
-    const head = div.querySelector('.bcol-head');
-    head.draggable = true;
-    head.addEventListener('dragstart', e=>{
-      if(e.target.closest('.task-card')) return;
+    // ── Column rename: click title ──
+    const titleEl = div.querySelector('.bcol-title');
+    titleEl.addEventListener('click', ()=> startEditColName(titleEl, col.id));
+
+    // ── Column drag: ONLY from ⠿ handle ──
+    const hint = div.querySelector('.bcol-drag-hint');
+    hint.addEventListener('dragstart', e=>{
       dragColId = col.id;
       dragTaskId = null;
-      setTimeout(()=>div.classList.add('col-dragging'), 0);
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', 'col:'+col.id);
+      setTimeout(()=>div.classList.add('col-dragging'), 0);
     });
-    head.addEventListener('dragend', ()=>{
+    hint.addEventListener('dragend', ()=>{
       div.classList.remove('col-dragging');
       dragColId = null;
       document.querySelectorAll('.board-col').forEach(c=>c.classList.remove('col-drop-left','col-drop-right','drag-over'));
@@ -1152,13 +1244,13 @@ function renderBoard(){
 }
 
 // ── INLINE COLUMN NAME EDIT ────────────────────────────────────────────────
-function startEditColName(e, colId){
-  e.stopPropagation();
-  const el = document.getElementById('bct-'+colId);
-  if(!el || el.contentEditable === 'true') return;
+function startEditColName(el, colId){
+  if(el.contentEditable === 'true') return;
+  const col = state.boardColumns.find(c=>c.id===colId);
+  if(!col) return;
   el.contentEditable = 'true';
   el.focus();
-  // Select all
+  // Select all text
   const range = document.createRange();
   range.selectNodeContents(el);
   const sel = window.getSelection();
@@ -1168,21 +1260,17 @@ function startEditColName(e, colId){
   const save = ()=>{
     const name = el.textContent.trim();
     el.contentEditable = 'false';
-    if(name){
-      const col = state.boardColumns.find(c=>c.id===colId);
-      if(col && col.name !== name){ col.name = name; saveState(); toast('✅ Coluna renomeada'); }
-    } else {
-      const col = state.boardColumns.find(c=>c.id===colId);
-      if(col) el.textContent = col.name;
-    }
+    el.onblur = null; el.onkeydown = null;
+    if(name && name !== col.name){ col.name = name; saveState(); toast('✅ Coluna renomeada'); }
+    else if(!name){ el.textContent = col.name; }
   };
   el.onblur = save;
   el.onkeydown = (ev)=>{
-    if(ev.key==='Enter'){ ev.preventDefault(); el.blur(); }
+    if(ev.key==='Enter'){ ev.preventDefault(); save(); }
     if(ev.key==='Escape'){
-      const col = state.boardColumns.find(c=>c.id===colId);
-      if(col) el.textContent = col.name;
+      el.textContent = col.name;
       el.contentEditable = 'false';
+      el.onblur = null; el.onkeydown = null;
     }
   };
 }
@@ -1234,8 +1322,8 @@ function colMenu(e, colId){
   menu.style.cssText = `position:fixed;z-index:8000;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:170px;left:${rect.left}px;top:${rect.bottom+4}px`;
 
   const items = [
-    {label:'✏️ Renomear', fn:()=>{ document.getElementById('bct-'+colId)?.click(); }},
-    {label:'🎨 Mudar cor', fn:()=>{ const dot = document.querySelector(`[data-col-id="${colId}"] .bcol-dot`)||document.querySelector(`#bct-${colId}`)?.closest('.bcol-head')?.querySelector('.bcol-dot'); if(dot) dot.click(); }},
+    {label:'✏️ Renomear', fn:()=>{ const el=document.getElementById('bct-'+colId); if(el) startEditColName(el, colId); }},
+    {label:'🎨 Mudar cor', fn:()=>{ const dot=document.getElementById('bct-'+colId)?.closest('.bcol-head')?.querySelector('.bcol-dot'); if(dot) dot.dispatchEvent(new MouseEvent('click',{bubbles:true})); }},
     {label:'➕ Adicionar tarefa', fn:()=>quickAdd(colId)},
     {divider:true},
     {label:'🗑️ Excluir coluna', danger:true, fn:()=>{
