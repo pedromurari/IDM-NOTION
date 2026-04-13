@@ -142,21 +142,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 /* ── TABLE VIEW ── */
 #table-view.active{display:block}
-.tbl-wrap{overflow-x:auto}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table.dtable{width:100%;border-collapse:collapse;font-size:13.5px}
-table.dtable th{text-align:left;padding:9px 14px;border-bottom:2px solid var(--border);font-weight:600;font-size:11.5px;color:var(--text-2);white-space:nowrap;background:#fafafa;position:sticky;top:0;z-index:1;user-select:none}
-table.dtable th .th-inner{display:flex;align-items:center;gap:6px;cursor:pointer}
-table.dtable th .th-inner:hover{color:var(--text-1)}
-table.dtable td{padding:9px 14px;border-bottom:1px solid #f0f0ef;vertical-align:middle}
+table.dtable th{text-align:left;padding:0;border-bottom:2px solid var(--border);font-weight:600;font-size:11.5px;color:var(--text-2);white-space:nowrap;background:#fafafa;position:sticky;top:0;z-index:1;user-select:none}
+.th-inner{display:flex;align-items:center;gap:4px;padding:9px 14px;cursor:pointer;transition:background .1s}
+.th-inner:hover{background:#f0f0f0;color:var(--text-1)}
+.th-name{border-radius:3px;padding:1px 3px;outline:none}
+.th-name[contenteditable=true]{background:rgba(99,102,241,.1);color:var(--accent)}
+.th-hide{opacity:0;cursor:pointer;font-size:13px;color:var(--text-3);padding:0 2px;margin-left:auto;flex-shrink:0;line-height:1}
+th:hover .th-hide{opacity:1}
+.th-hide:hover{color:#dc2626}
+.th-add{width:38px;text-align:center}
+.th-add .th-inner{justify-content:center;font-size:18px;font-weight:300;color:var(--text-3)}
+.th-add .th-inner:hover{color:var(--text-1)}
+table.dtable td{padding:0;border-bottom:1px solid #f0f0ef;vertical-align:middle}
 table.dtable tr:hover td{background:#fafafa}
 table.dtable tr:hover .row-acts{opacity:1}
-.cell-edit{cursor:pointer;border-radius:4px;padding:2px 5px;margin:-2px -5px;transition:background .1s}
-.cell-edit:hover{background:#f0f0ef}
-.row-acts{opacity:0;transition:opacity .15s;display:flex;gap:3px}
-.row-btn{width:24px;height:24px;border-radius:4px;border:none;background:transparent;cursor:pointer;color:var(--text-3);display:flex;align-items:center;justify-content:center;font-size:13px}
+.tbl-cell{padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;min-height:40px;transition:background .1s}
+.tbl-cell:hover{background:rgba(0,0,0,.04)}
+.tbl-cell.editing{background:rgba(99,102,241,.05);cursor:text}
+.title-text{font-weight:500;outline:none;min-width:140px;border-radius:4px}
+.title-text[contenteditable=true]{background:rgba(99,102,241,.06);padding:1px 3px}
+.row-acts{opacity:0;transition:opacity .15s;display:flex;gap:3px;padding:4px 8px}
+.row-btn{width:26px;height:26px;border-radius:5px;border:none;background:transparent;cursor:pointer;color:var(--text-3);display:flex;align-items:center;justify-content:center;font-size:13px}
 .row-btn:hover{background:#e8e8e7;color:var(--text-1)}
 .add-row{display:flex;align-items:center;gap:7px;padding:9px 14px;color:var(--text-3);font-size:13px;cursor:pointer;width:100%;border:none;background:transparent;font-family:inherit;text-align:left;border-top:1px solid var(--border);transition:background .1s}
 .add-row:hover{background:#fafafa;color:var(--text-2)}
+/* Cell popup */
+.cell-popup{position:fixed;z-index:7000;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.16);min-width:190px;max-height:320px;overflow-y:auto}
+.cp-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;transition:background .1s}
+.cp-item:hover{background:#f7f7f5}
+.cp-item.selected{background:#eef2ff;font-weight:600}
+.cp-check{width:16px;height:16px;border-radius:4px;border:1.5px solid #d1d5db;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.cp-check.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.date-popup{position:fixed;z-index:7000;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 8px 28px rgba(0,0,0,.16);width:220px}
 
 /* ── STATUS/PERIOD BADGES ── */
 .sbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap;cursor:pointer}
@@ -294,9 +313,12 @@ textarea.finput{resize:vertical;min-height:76px}
   /* Goals */
   #goals-view.active{grid-template-columns:1fr}
 
-  /* Table */
-  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table.dtable th:nth-child(n+5),table.dtable td:nth-child(n+5){display:none}
+  /* Table — força scroll horizontal no mobile */
+  #table-view.active{display:block;overflow:hidden}
+  .tbl-wrap{overflow-x:scroll;-webkit-overflow-scrolling:touch;cursor:grab}
+  .tbl-wrap:active{cursor:grabbing}
+  table.dtable{min-width:780px}
+  .filter-bar-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
 
   /* Modal */
   .modal,.modal-lg{width:96vw;margin:0 auto;max-height:92vh}
@@ -512,7 +534,7 @@ textarea.finput{resize:vertical;min-height:76px}
   </div>
 
   <!-- FILTER BAR -->
-  <div id="filter-bar">
+  <div id="filter-bar" class="filter-bar-scroll">
     <span class="filter-label">Filtrar:</span>
     <select class="fsel" id="f-person" onchange="applyFilters()">
       <option value="">👥 Todas as pessoas</option>
@@ -1385,63 +1407,355 @@ function renderTable(){
   const el = document.getElementById('table-view');
   const tasks = getFilteredTasks();
   const cols = state.tableColumns.filter(c=>c.visible);
+  el.innerHTML = '';
 
-  el.innerHTML = `<div class="tbl-wrap">
-  <table class="dtable">
-    <thead><tr>
-      ${cols.map(c=>`<th><div class="th-inner"><span>${esc(c.name)}</span></div></th>`).join('')}
-      <th style="width:60px"></th>
-    </tr></thead>
-    <tbody id="tbl-body">
-      ${tasks.length===0?`<tr><td colspan="${cols.length+1}" style="text-align:center;padding:40px;color:var(--text-3)">Nenhuma tarefa encontrada. <button class="btn btn-primary" onclick="openAddTask()" style="margin-left:12px">+ Criar tarefa</button></td></tr>`:''}
-      ${tasks.map(t=>tableRowHTML(t, cols)).join('')}
-    </tbody>
-  </table>
-  <button class="add-row" onclick="openAddTask()">+ Nova tarefa</button>
-  </div>`;
-}
+  const wrap = document.createElement('div');
+  wrap.className = 'tbl-wrap';
 
-function tableRowHTML(t, cols){
-  const today = new Date().toISOString().split('T')[0];
-  return `<tr data-task-id="${t.id}">
-  ${cols.map(c=>{ return `<td>${cellHTML(t, c)}</td>`}).join('')}
-  <td><div class="row-acts">
-    <button class="row-btn" onclick="showDetail('${t.id}')" title="Ver">🔍</button>
-    <button class="row-btn" onclick="editTask('${t.id}')" title="Editar">✏️</button>
-    <button class="row-btn" onclick="deleteTask('${t.id}')" title="Excluir" style="color:#dc2626">🗑️</button>
-  </div></td>
-</tr>`;
-}
+  const table = document.createElement('table');
+  table.className = 'dtable';
 
-function cellHTML(t, col){
-  switch(col.type){
-    case 'title': return `<div style="font-weight:500;cursor:pointer" onclick="showDetail('${t.id}')">${esc(t.title)}</div>`;
-    case 'status': return `<div class="sbadge s-${t.status}" onclick="cycleStatus('${t.id}')" title="Clique para mudar">${statusLabel(t.status)}</div>`;
-    case 'person': return `<div class="person-badge"><div class="avatar av-${t.assignee}" style="width:22px;height:22px;font-size:10px">${t.assignee[0].toUpperCase()}</div>${capitalize(t.assignee)}</div>`;
-    case 'priority': return `<span class="pbadge p-${t.priority}">${priorityLabel(t.priority)}</span>`;
-    case 'area': return `<span style="font-size:12px">${areaLabel(t.area)}</span>`;
-    case 'category': return `<span style="font-size:12.5px">${catLabel(t.category)}</span>`;
-    case 'period': return `<span class="card-period per-${t.period}">${periodLabel(t.period)}</span>`;
-    case 'date': {
-      const today = new Date().toISOString().split('T')[0];
-      const over = t.due && t.due<today && t.status!=='done';
-      return t.due?`<span style="font-size:12.5px;color:${over?'#dc2626':'var(--text-1)'}">${formatDate(t.due)}</span>`:`<span style="color:var(--text-3)">—</span>`;
+  // ── HEADER ──
+  const thead = document.createElement('thead');
+  const hrow = document.createElement('tr');
+  cols.forEach(col=>{
+    const th = document.createElement('th');
+    const inner = document.createElement('div');
+    inner.className = 'th-inner';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'th-name';
+    nameEl.textContent = col.name;
+    // Rename on click (not title col)
+    if(col.id !== 'title'){
+      nameEl.title = 'Clique para renomear';
+      nameEl.addEventListener('click', ()=>startTableColEdit(nameEl, col.id));
     }
-    case 'tags': return t.tags&&t.tags.length?t.tags.map(tg=>`<span class="card-tag" style="font-size:11px;margin-right:3px">#${esc(tg)}</span>`).join(''):`<span style="color:var(--text-3)">—</span>`;
-    default: return `<span>${esc(t[col.id])||'—'}</span>`;
+    const hideBtn = document.createElement('span');
+    hideBtn.className = 'th-hide';
+    hideBtn.textContent = '×';
+    hideBtn.title = 'Ocultar coluna';
+    if(col.id !== 'title'){
+      hideBtn.addEventListener('click', e=>{ e.stopPropagation(); col.visible=false; saveState(); renderTable(); });
+    }
+    inner.appendChild(nameEl);
+    inner.appendChild(hideBtn);
+    th.appendChild(inner);
+    hrow.appendChild(th);
+  });
+  // "+" toggle columns
+  const thAdd = document.createElement('th');
+  thAdd.className = 'th-add';
+  thAdd.innerHTML = '<div class="th-inner" title="Mostrar/ocultar colunas">＋</div>';
+  thAdd.querySelector('.th-inner').addEventListener('click', e=>openColVisibility(e));
+  hrow.appendChild(thAdd);
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  // ── BODY ──
+  const tbody = document.createElement('tbody');
+  if(tasks.length===0){
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = cols.length+1;
+    td.style.cssText = 'text-align:center;padding:40px;color:var(--text-3)';
+    td.innerHTML = 'Nenhuma tarefa. ';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.textContent = '+ Criar tarefa';
+    btn.onclick = openAddTask;
+    td.appendChild(btn);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
   }
+  tasks.forEach(task=>{
+    const tr = document.createElement('tr');
+    tr.dataset.taskId = task.id;
+    cols.forEach(col=>{
+      const td = document.createElement('td');
+      td.appendChild(buildCell(task, col));
+      tr.appendChild(td);
+    });
+    // Actions
+    const tdAct = document.createElement('td');
+    const acts = document.createElement('div');
+    acts.className = 'row-acts';
+    [{ico:'✏️',fn:()=>editTask(task.id),title:'Editar'},{ico:'🗑️',fn:()=>deleteTask(task.id),title:'Excluir',red:true}].forEach(a=>{
+      const b = document.createElement('button');
+      b.className = 'row-btn';
+      b.textContent = a.ico;
+      b.title = a.title;
+      if(a.red) b.style.color='#dc2626';
+      b.onclick = a.fn;
+      acts.appendChild(b);
+    });
+    tdAct.appendChild(acts);
+    tr.appendChild(tdAct);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+
+  // Add row
+  const addRow = document.createElement('button');
+  addRow.className = 'add-row';
+  addRow.textContent = '+ Nova tarefa';
+  addRow.onclick = openAddTask;
+  wrap.appendChild(addRow);
+
+  el.appendChild(wrap);
 }
 
-function cycleStatus(id){
-  const order = ['todo','doing','review','done','blocked'];
-  const task = state.tasks.find(t=>t.id===id);
-  if(!task) return;
-  const idx = order.indexOf(task.status);
-  task.status = order[(idx+1)%order.length];
-  saveState();
-  renderTable();
-  toast('Status atualizado');
+// ── BUILD CELL (inline editable) ───────────────────────────────────────────
+function buildCell(task, col){
+  const div = document.createElement('div');
+  div.className = 'tbl-cell';
+  const today = new Date().toISOString().split('T')[0];
+
+  switch(col.type){
+    case 'title': {
+      const span = document.createElement('span');
+      span.className = 'title-text';
+      span.textContent = task.title;
+      span.title = 'Clique para editar';
+      div.appendChild(span);
+      div.addEventListener('click', ()=>{
+        if(span.contentEditable==='true') return;
+        span.contentEditable = 'true';
+        span.focus();
+        selectAll(span);
+        div.classList.add('editing');
+        const save = ()=>{
+          const v = span.textContent.trim();
+          span.contentEditable='false'; div.classList.remove('editing');
+          if(v && v!==task.title){ task.title=v; saveState(); toast('✅ Título salvo'); }
+          else if(!v) span.textContent = task.title;
+        };
+        span.onblur = save;
+        span.onkeydown = e=>{ if(e.key==='Enter'){e.preventDefault();span.blur();} if(e.key==='Escape'){span.textContent=task.title;span.contentEditable='false';div.classList.remove('editing');} };
+      });
+      break;
+    }
+    case 'status': {
+      const badge = document.createElement('div');
+      badge.className = `sbadge s-${task.status}`;
+      badge.textContent = statusLabel(task.status);
+      div.appendChild(badge);
+      div.addEventListener('click', e=>openCellDropdown(e, task, 'status', [
+        {val:'todo',html:`<span class="sbadge s-todo">A Fazer</span>`},
+        {val:'doing',html:`<span class="sbadge s-doing">Em Andamento</span>`},
+        {val:'review',html:`<span class="sbadge s-review">Em Revisão</span>`},
+        {val:'done',html:`<span class="sbadge s-done">Concluído</span>`},
+        {val:'blocked',html:`<span class="sbadge s-blocked">Bloqueado</span>`},
+      ], v=>{ badge.className=`sbadge s-${v}`; badge.textContent=statusLabel(v); }));
+      break;
+    }
+    case 'person': {
+      div.innerHTML = `<div class="avatar av-${task.assignee}" style="width:22px;height:22px;font-size:10px">${task.assignee[0].toUpperCase()}</div><span style="font-size:13px">${capitalize(task.assignee)}</span>`;
+      div.addEventListener('click', e=>openCellDropdown(e, task, 'assignee', [
+        {val:'pedro',  html:`<div class="avatar av-pedro"  style="width:20px;height:20px;font-size:9px">P</div> Pedro`},
+        {val:'igor',   html:`<div class="avatar av-igor"   style="width:20px;height:20px;font-size:9px">I</div> Igor`},
+        {val:'vinicius',html:`<div class="avatar av-vinicius" style="width:20px;height:20px;font-size:9px">V</div> Vinicius`},
+        {val:'rodrygo',html:`<div class="avatar av-rodrygo" style="width:20px;height:20px;font-size:9px">R</div> Rodrygo`},
+        {val:'todos',  html:`<div class="avatar av-todos"  style="width:20px;height:20px;font-size:9px">T</div> Todos`},
+      ], v=>{ div.innerHTML=`<div class="avatar av-${v}" style="width:22px;height:22px;font-size:10px">${v[0].toUpperCase()}</div><span style="font-size:13px">${capitalize(v)}</span>`; }));
+      break;
+    }
+    case 'priority': {
+      const badge = document.createElement('span');
+      badge.className = `pbadge p-${task.priority}`;
+      badge.textContent = priorityLabel(task.priority);
+      div.appendChild(badge);
+      div.addEventListener('click', e=>openCellDropdown(e, task, 'priority', [
+        {val:'baixa',  html:`<span class="pbadge p-baixa">Baixa</span>`},
+        {val:'media',  html:`<span class="pbadge p-media">Média</span>`},
+        {val:'alta',   html:`<span class="pbadge p-alta">Alta</span>`},
+        {val:'urgente',html:`<span class="pbadge p-urgente">🔴 Urgente</span>`},
+      ], v=>{ badge.className=`pbadge p-${v}`; badge.textContent=priorityLabel(v); }));
+      break;
+    }
+    case 'area': {
+      const span = document.createElement('span');
+      span.style.fontSize='12.5px';
+      span.textContent = areaLabel(task.area);
+      div.appendChild(span);
+      div.addEventListener('click', e=>openCellDropdown(e, task, 'area', [
+        {val:'idm',          html:'🏛️ IDM - Instituto Despertamente'},
+        {val:'npa-presencial',html:'🎪 NPA Presencial'},
+        {val:'npa-7esferas', html:'🔮 NPA 7 Esferas 2.0'},
+      ], v=>{ span.textContent=areaLabel(v); }));
+      break;
+    }
+    case 'category': {
+      const span = document.createElement('span');
+      span.style.fontSize='12.5px';
+      span.textContent = catLabel(task.category);
+      div.appendChild(span);
+      div.addEventListener('click', e=>openCellDropdown(e, task, 'category', [
+        {val:'turmas',    html:'📚 Turmas / Cursos'},
+        {val:'lives',     html:'🎥 Lives / Eventos'},
+        {val:'conteudo',  html:'✍️ Conteúdo'},
+        {val:'produto',   html:'🛠️ Produto'},
+        {val:'marketing', html:'📣 Marketing'},
+        {val:'social',    html:'📱 Redes Sociais'},
+        {val:'vendas',    html:'💰 Vendas'},
+        {val:'trafego',   html:'🎯 Tráfego Pago'},
+        {val:'suporte',   html:'🤝 Suporte'},
+        {val:'financeiro',html:'💳 Financeiro'},
+        {val:'operacional',html:'⚙️ Operacional'},
+        {val:'estrategia',html:'🧠 Estratégia'},
+      ], v=>{ span.textContent=catLabel(v); }));
+      break;
+    }
+    case 'period': {
+      const span = document.createElement('span');
+      span.className = `card-period per-${task.period}`;
+      span.textContent = periodLabel(task.period);
+      div.appendChild(span);
+      div.addEventListener('click', e=>openCellDropdown(e, task, 'period', [
+        {val:'diario', html:'☀️ Diário'},
+        {val:'semanal',html:'📅 Semanal'},
+        {val:'mensal', html:'🗓️ Mensal'},
+        {val:'projeto',html:'🚀 Projeto'},
+      ], v=>{ span.className=`card-period per-${v}`; span.textContent=periodLabel(v); }));
+      break;
+    }
+    case 'date': {
+      const over = task.due && task.due<today && task.status!=='done';
+      const span = document.createElement('span');
+      span.style.fontSize='12.5px';
+      span.style.color = over?'#dc2626':'inherit';
+      span.textContent = task.due ? (over?'⚠️ ':'')+formatDate(task.due) : 'Definir data';
+      if(!task.due) span.style.color='var(--text-3)';
+      div.appendChild(span);
+      div.addEventListener('click', e=>openDateCell(e, task, span));
+      break;
+    }
+    case 'tags': {
+      if(task.tags&&task.tags.length){
+        task.tags.slice(0,3).forEach(tg=>{ const s=document.createElement('span'); s.className='card-tag'; s.style.fontSize='11px'; s.textContent='#'+tg; div.appendChild(s); });
+      } else {
+        const s=document.createElement('span'); s.style.color='var(--text-3)'; s.textContent='—'; div.appendChild(s);
+      }
+      div.addEventListener('click', ()=>editTask(task.id));
+      break;
+    }
+    default:
+      div.textContent = task[col.id]||'—';
+  }
+  return div;
 }
+
+// ── CELL POPUP DROPDOWN ────────────────────────────────────────────────────
+function openCellDropdown(e, task, field, options, onUpdate){
+  e.stopPropagation();
+  closeAllPopups();
+  const popup = document.createElement('div');
+  popup.id = 'cell-popup';
+  popup.className = 'cell-popup';
+  const rect = e.currentTarget.getBoundingClientRect();
+  let left = rect.left;
+  let top = rect.bottom+4;
+  popup.style.left = Math.min(left, window.innerWidth-210)+'px';
+  popup.style.top = Math.min(top, window.innerHeight-300)+'px';
+
+  options.forEach(opt=>{
+    const item = document.createElement('div');
+    item.className = 'cp-item'+(task[field]===opt.val?' selected':'');
+    item.innerHTML = opt.html;
+    item.onclick = ()=>{
+      task[field] = opt.val;
+      saveState();
+      if(onUpdate) onUpdate(opt.val);
+      popup.remove();
+      toast('✅ Salvo');
+    };
+    popup.appendChild(item);
+  });
+  document.body.appendChild(popup);
+  setTimeout(()=>{ const close=ev=>{ if(!popup.contains(ev.target)){popup.remove();document.removeEventListener('click',close);} }; document.addEventListener('click',close); },10);
+}
+
+// ── DATE CELL ──────────────────────────────────────────────────────────────
+function openDateCell(e, task, span){
+  e.stopPropagation();
+  closeAllPopups();
+  const popup = document.createElement('div');
+  popup.id = 'cell-popup';
+  popup.className = 'date-popup';
+  const rect = e.currentTarget.getBoundingClientRect();
+  popup.style.left = Math.min(rect.left, window.innerWidth-230)+'px';
+  popup.style.top = Math.min(rect.bottom+4, window.innerHeight-160)+'px';
+  popup.innerHTML = `<div style="font-size:11.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Vencimento</div>
+  <input type="date" id="cell-date-in" value="${task.due||''}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13.5px;font-family:inherit;outline:none">
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button onclick="applyDate('${task.id}')" style="flex:1;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600">Confirmar</button>
+    <button onclick="applyDate('${task.id}',true)" style="flex:1;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px">Remover</button>
+  </div>`;
+  document.body.appendChild(popup);
+  document.getElementById('cell-date-in')?.focus();
+  popup._span = span; popup._task = task;
+  setTimeout(()=>{ const close=ev=>{ if(!popup.contains(ev.target)){popup.remove();document.removeEventListener('click',close);} }; document.addEventListener('click',close); },10);
+}
+
+function applyDate(taskId, clear=false){
+  const task = state.tasks.find(t=>t.id===taskId);
+  if(!task) return;
+  task.due = clear ? null : (document.getElementById('cell-date-in')?.value||null);
+  saveState();
+  document.getElementById('cell-popup')?.remove();
+  renderTable();
+  toast(clear?'Data removida':'📅 Data atualizada');
+}
+
+// ── TABLE COL RENAME ───────────────────────────────────────────────────────
+function startTableColEdit(el, colId){
+  if(el.contentEditable==='true') return;
+  const col = state.tableColumns.find(c=>c.id===colId);
+  if(!col) return;
+  el.contentEditable='true'; el.focus();
+  selectAll(el);
+  const save=()=>{ const v=el.textContent.trim(); el.contentEditable='false'; if(v&&v!==col.name){col.name=v;saveState();toast('✅ Coluna renomeada');} else if(!v) el.textContent=col.name; };
+  el.onblur=save;
+  el.onkeydown=ev=>{ if(ev.key==='Enter'){ev.preventDefault();save();} if(ev.key==='Escape'){el.textContent=col.name;el.contentEditable='false';} };
+}
+
+// ── COL VISIBILITY ─────────────────────────────────────────────────────────
+function openColVisibility(e){
+  e.stopPropagation();
+  closeAllPopups();
+  const popup = document.createElement('div');
+  popup.id = 'cell-popup';
+  popup.className = 'cell-popup';
+  popup.style.minWidth = '210px';
+  const rect = e.currentTarget.getBoundingClientRect();
+  popup.style.left = Math.max(0, rect.right-220)+'px';
+  popup.style.top = (rect.bottom+4)+'px';
+  const title = document.createElement('div');
+  title.style.cssText='font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:4px 8px 8px';
+  title.textContent='Mostrar / Ocultar';
+  popup.appendChild(title);
+  state.tableColumns.forEach(col=>{
+    const item = document.createElement('div');
+    item.className = 'cp-item';
+    const chk = document.createElement('span');
+    chk.className = 'cp-check'+(col.visible?' on':'');
+    chk.textContent = col.visible?'✓':'';
+    item.appendChild(chk);
+    const lbl = document.createElement('span');
+    lbl.textContent = col.name;
+    item.appendChild(lbl);
+    if(col.id!=='title'){
+      item.onclick=()=>{ col.visible=!col.visible; saveState(); renderTable(); popup.remove(); };
+    } else { item.style.opacity='.5'; item.style.cursor='default'; }
+    popup.appendChild(item);
+  });
+  document.body.appendChild(popup);
+  setTimeout(()=>{ const close=ev=>{ if(!popup.contains(ev.target)){popup.remove();document.removeEventListener('click',close);} }; document.addEventListener('click',close); },10);
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function closeAllPopups(){ document.getElementById('cell-popup')?.remove(); document.getElementById('col-cpicker')?.remove(); document.getElementById('col-menu-pop')?.remove(); }
+function selectAll(el){ try{ const r=document.createRange(); r.selectNodeContents(el); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); }catch(e){} }
 
 // ── GOALS ──────────────────────────────────────────────────────────────────
 function renderGoals(){
