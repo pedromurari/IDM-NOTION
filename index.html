@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDM Tasks — Gestão de Tarefas</title>
+<style>
+:root {
+  --sidebar-bg: #191919;
+  --sidebar-text: #9b9a97;
+  --sidebar-hover: rgba(255,255,255,0.08);
+  --sidebar-active: rgba(255,255,255,0.14);
+  --border: #e8e8e6;
+  --text-1: #1a1a1a;
+  --text-2: #6b6b6b;
+  --text-3: #9a9a9a;
+  --accent: #6366f1;
+  --accent-light: #eef2ff;
+  --bg: #fff;
+  --surface: #f7f7f5;
+  --pedro: #8b5cf6;
+  --igor: #3b82f6;
+  --vinicius: #10b981;
+  --rodrygo: #f59e0b;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text-1);display:flex;height:100vh;overflow:hidden;font-size:14px}
+
+/* ── SIDEBAR ── */
+#sidebar{width:240px;min-width:240px;background:var(--sidebar-bg);display:flex;flex-direction:column;height:100vh;overflow:hidden;transition:width .2s}
+.sb-head{padding:14px 12px 8px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.sb-logo{width:26px;height:26px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0}
+.sb-ws{color:#fff;font-weight:700;font-size:14px;letter-spacing:-.2px}
+.sb-ws span{color:#9b9a97;font-weight:400;font-size:12px;display:block;margin-top:1px}
+.sb-user{padding:6px 10px 10px;margin:0 2px}
+.sb-user select{width:100%;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);color:#fff;padding:7px 10px;border-radius:7px;font-size:13px;cursor:pointer;outline:none;font-family:inherit}
+.sb-user select option{background:#2d2d2d}
+.sb-label{padding:4px 14px 2px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#4d4d4d}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 12px;color:var(--sidebar-text);cursor:pointer;border-radius:5px;margin:1px 6px;transition:all .1s;font-size:13.5px;user-select:none}
+.sb-item:hover{background:var(--sidebar-hover);color:#fff}
+.sb-item.active{background:var(--sidebar-active);color:#fff}
+.sb-item .ico{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sb-item .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-divider{height:1px;background:rgba(255,255,255,.07);margin:6px 12px}
+.sb-add{display:flex;align-items:center;gap:7px;padding:6px 12px;color:#4d4d4d;cursor:pointer;font-size:12.5px;margin:2px 6px;border-radius:5px;transition:all .1s}
+.sb-add:hover{background:var(--sidebar-hover);color:var(--sidebar-text)}
+.sb-footer{margin-top:auto;padding:10px 12px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer-info{color:#4d4d4d;font-size:11.5px;line-height:1.5}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+
+/* ── PAGE HEADER ── */
+#ph{padding:30px 56px 0;border-bottom:1px solid var(--border)}
+.ph-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ph-icon{font-size:34px;cursor:pointer;line-height:1}
+#page-title{font-size:26px;font-weight:800;color:var(--text-1);border:none;outline:none;background:transparent;width:100%;font-family:inherit;letter-spacing:-.5px}
+.ph-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.view-tabs{display:flex;align-items:center}
+.vtab{padding:9px 14px;cursor:pointer;color:var(--text-2);font-size:13px;border-bottom:2px solid transparent;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;user-select:none}
+.vtab:hover{color:var(--text-1)}
+.vtab.active{color:var(--text-1);border-bottom-color:var(--text-1);font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:7px;font-size:13px;cursor:pointer;border:none;font-family:inherit;transition:all .15s;font-weight:500}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#5558e0}
+.btn-ghost{background:transparent;color:var(--text-2);padding:6px 10px}
+.btn-ghost:hover{background:var(--surface);color:var(--text-1)}
+.btn-surface{background:var(--surface);color:var(--text-1)}
+.btn-surface:hover{background:#eee}
+
+/* ── FILTER BAR ── */
+#filter-bar{padding:8px 56px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:#fff;flex-wrap:wrap;min-height:44px}
+.fchip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--text-2);background:#fff;transition:all .15s;white-space:nowrap}
+.fchip:hover{border-color:#bbb;background:#f8f8f8}
+.fchip.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.fsel{padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-2);background:#fff;cursor:pointer;outline:none;font-family:inherit}
+.filter-label{font-size:12px;color:var(--text-3)}
+
+/* ── CONTENT ── */
+#page-content{flex:1;overflow:auto;padding:20px 56px}
+.view{display:none}
+.view.active{display:block}
+#board-view.active{display:flex;gap:14px;align-items:flex-start;padding-bottom:20px;min-height:100%;overflow-x:auto}
+#goals-view.active{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+#dashboard-view.active{display:flex;flex-direction:column;gap:20px}
+
+/* ── BOARD ── */
+.board-col{min-width:278px;width:278px;background:var(--surface);border-radius:10px;padding:12px;flex-shrink:0}
+.bcol-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:2px 0}
+.bcol-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bcol-title{font-weight:700;font-size:13px;flex:1;cursor:default}
+.bcol-title[contenteditable="true"]{cursor:text;outline:none;border-bottom:1px solid var(--accent)}
+.bcol-count{font-size:11.5px;color:var(--text-3);background:rgba(0,0,0,.06);padding:1px 8px;border-radius:10px}
+.bcol-menu{opacity:0;cursor:pointer;color:var(--text-3);font-size:16px;padding:2px 5px;border-radius:4px;transition:opacity .15s;user-select:none}
+.board-col:hover .bcol-menu{opacity:1}
+.board-cards{display:flex;flex-direction:column;gap:8px;min-height:40px}
+.board-col.drag-over{background:#eef2ff}
+.board-col.drag-over .board-cards{min-height:80px;border:2px dashed #c7d2fe;border-radius:8px}
+
+/* ── TASK CARD ── */
+.task-card{background:#fff;border-radius:8px;padding:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);border:1px solid transparent;transition:all .15s;position:relative;draggable:true}
+.task-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.12);border-color:#e2e2e0;transform:translateY(-1px)}
+.task-card.dragging{opacity:.45;cursor:grabbing}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.card-title{font-size:13.5px;font-weight:500;line-height:1.4;color:var(--text-1)}
+.pbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.p-baixa{background:#f3f4f6;color:#6b7280}
+.p-media{background:#dbeafe;color:#2563eb}
+.p-alta{background:#ffedd5;color:#ea580c}
+.p-urgente{background:#fee2e2;color:#dc2626}
+.card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.card-tag{font-size:11px;padding:2px 7px;border-radius:4px;background:#f0f0ef;color:var(--text-2)}
+.card-period{font-size:11px;padding:2px 7px;border-radius:10px}
+.per-diario{background:#fef3c7;color:#d97706}
+.per-semanal{background:#e0f2fe;color:#0369a1}
+.per-mensal{background:#f3e8ff;color:#7c3aed}
+.per-projeto{background:#f0fdf4;color:#15803d}
+.card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.card-area{font-size:10.5px;padding:2px 6px;border-radius:3px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600}
+.card-due{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:3px}
+.card-due.overdue{color:#dc2626}
+.avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:#fff;flex-shrink:0}
+.av-pedro{background:var(--pedro)}
+.av-igor{background:var(--igor)}
+.av-vinicius{background:var(--vinicius)}
+.av-rodrygo{background:var(--rodrygo)}
+.av-todos{background:#9ca3af}
+.add-card-btn{display:flex;align-items:center;gap:6px;width:100%;padding:8px 6px;color:var(--text-3);font-size:13px;cursor:pointer;border-radius:6px;margin-top:8px;border:none;background:transparent;font-family:inherit;transition:all .15s}
+.add-card-btn:hover{background:rgba(0,0,0,.05);color:var(--text-2)}
+.add-col-btn{min-width:220px;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;background:rgba(0,0,0,.03);border:2px dashed #ddd;border-radius:10px;color:var(--text-3);cursor:pointer;font-size:13px;font-family:inherit;transition:all .15s;flex-shrink:0;align-self:flex-start}
+.add-col-btn:hover{border-color:#bbb;color:var(--text-2);background:rgba(0,0,0,.05)}
+
+/* ── TABLE VIEW ── */
+#table-view.active{display:block}
+.tbl-wrap{overflow-x:auto}
+table.dtable{width:100%;border-collapse:collapse;font-size:13.5px}
+table.dtable th{text-align:left;padding:9px 14px;border-bottom:2px solid var(--border);font-weight:600;font-size:11.5px;color:var(--text-2);white-space:nowrap;background:#fafafa;position:sticky;top:0;z-index:1;user-select:none}
+table.dtable th .th-inner{display:flex;align-items:center;gap:6px;cursor:pointer}
+table.dtable th .th-inner:hover{color:var(--text-1)}
+table.dtable td{padding:9px 14px;border-bottom:1px solid #f0f0ef;vertical-align:middle}
+table.dtable tr:hover td{background:#fafafa}
+table.dtable tr:hover .row-acts{opacity:1}
+.cell-edit{cursor:pointer;border-radius:4px;padding:2px 5px;margin:-2px -5px;transition:background .1s}
+.cell-edit:hover{background:#f0f0ef}
+.row-acts{opacity:0;transition:opacity .15s;display:flex;gap:3px}
+.row-btn{width:24px;height:24px;border-radius:4px;border:none;background:transparent;cursor:pointer;color:var(--text-3);display:flex;align-items:center;justify-content:center;font-size:13px}
+.row-btn:hover{background:#e8e8e7;color:var(--text-1)}
+.add-row{display:flex;align-items:center;gap:7px;padding:9px 14px;color:var(--text-3);font-size:13px;cursor:pointer;width:100%;border:none;background:transparent;font-family:inherit;text-align:left;border-top:1px solid var(--border);transition:background .1s}
+.add-row:hover{background:#fafafa;color:var(--text-2)}
+
+/* ── STATUS/PERIOD BADGES ── */
+.sbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap;cursor:pointer}
+.s-todo{background:#f3f4f6;color:#6b7280}
+.s-doing{background:#dbeafe;color:#2563eb}
+.s-review{background:#fef9c3;color:#a16207}
+.s-done{background:#dcfce7;color:#16a34a}
+.s-blocked{background:#fee2e2;color:#dc2626}
+
+/* ── GOALS ── */
+.goals-panel{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.gp-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafafa}
+.gp-title{font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+.gp-count{font-size:11.5px;color:var(--text-3)}
+.gp-body{padding:10px}
+.goal-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;transition:background .1s;group:true}
+.goal-item:hover{background:var(--surface)}
+.gcheck{width:17px;height:17px;border:2px solid #d1d5db;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:10px;font-weight:bold}
+.gcheck.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.gtext{font-size:13.5px;flex:1;line-height:1.4}
+.gtext.done{text-decoration:line-through;color:var(--text-3)}
+.gdel{opacity:0;cursor:pointer;color:var(--text-3);font-size:14px;padding:2px}
+.goal-item:hover .gdel{opacity:1}
+.goal-item:hover .gdel:hover{color:#dc2626}
+.gadd-row{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;color:var(--text-3);font-size:13px;border-radius:6px;margin-top:4px;transition:background .1s}
+.gadd-row:hover{background:var(--surface);color:var(--text-2)}
+.goal-prog{height:4px;background:#f0f0ef;border-radius:2px;overflow:hidden;margin:10px 18px}
+.goal-prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
+.gadd-input{border:none;outline:none;font-family:inherit;font-size:13.5px;color:var(--text-1);background:transparent;flex:1}
+
+/* ── DASHBOARD ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px}
+.stat-label{font-size:11.5px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.stat-val{font-size:30px;font-weight:800;color:var(--text-1)}
+.stat-sub{font-size:12px;color:var(--text-3);margin-top:4px}
+.dash-section{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ds-head{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:space-between}
+.person-cols{display:grid;grid-template-columns:repeat(4,1fr)}
+.p-col{padding:14px;border-right:1px solid var(--border)}
+.p-col:last-child{border-right:none}
+.p-col-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.p-col-name{font-weight:700;font-size:13px}
+.p-task-item{padding:6px 8px;border-radius:6px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:3px;transition:background .1s;line-height:1.3}
+.p-task-item:hover{background:var(--surface)}
+.recent-list{padding:10px 14px}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.modal-lg{width:720px}
+.mhead{padding:22px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.mtitle{font-size:17px;font-weight:800}
+.mclose{width:30px;height:30px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:20px;color:var(--text-3);display:flex;align-items:center;justify-content:center}
+.mclose:hover{background:var(--surface);color:var(--text-1)}
+.mbody{padding:20px 24px}
+.mfoot{padding:0 24px 22px;display:flex;justify-content:flex-end;gap:10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+.fgroup{display:flex;flex-direction:column;gap:5px}
+.flabel{font-size:11.5px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em}
+.finput{padding:9px 13px;border:1.5px solid var(--border);border-radius:7px;font-size:13.5px;font-family:inherit;color:var(--text-1);background:#fff;outline:none;transition:border-color .15s}
+.finput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.finput.big{font-size:16px;padding:10px 14px;font-weight:600}
+textarea.finput{resize:vertical;min-height:76px}
+.fsel{appearance:none;padding:9px 32px 9px 13px;border:1.5px solid var(--border);border-radius:7px;font-size:13.5px;font-family:inherit;color:var(--text-1);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") no-repeat right 10px center;cursor:pointer;outline:none;transition:border-color .15s;width:100%}
+.fsel:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.fsec{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;padding:10px 0 4px;grid-column:1/-1;border-top:1px solid var(--border);margin-top:4px;display:flex;align-items:center;gap:8px}
+.fsec:first-child{border-top:none;padding-top:0;margin-top:0}
+.tag-box{display:flex;flex-wrap:wrap;gap:5px;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;min-height:40px;align-items:center;cursor:text}
+.tag-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.tag-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--accent-light);color:var(--accent);border-radius:4px;font-size:12px}
+.tag-x{cursor:pointer;opacity:.6;font-size:14px;line-height:1}
+.tag-x:hover{opacity:1}
+.tag-in{border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;min-width:80px;flex:1}
+.idm-tip{background:linear-gradient(135deg,#eef2ff,#f3e8ff);border:1px solid #c7d2fe;border-radius:8px;padding:12px 14px;font-size:12.5px;color:#4c46b6;line-height:1.5;grid-column:1/-1}
+.idm-tip strong{font-weight:700}
+
+/* ── CONTEXT MENU ── */
+#ctx{display:none;position:fixed;background:#fff;border:1px solid var(--border);border-radius:9px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.15);z-index:9000;min-width:160px}
+#ctx.open{display:block}
+.ctx-item{padding:8px 13px;border-radius:5px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:9px}
+.ctx-item:hover{background:var(--surface)}
+.ctx-item.danger{color:#dc2626}
+.ctx-item.danger:hover{background:#fee2e2}
+.ctx-divider{height:1px;background:var(--border);margin:4px 0}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(0,0,0,.86);color:#fff;padding:10px 22px;border-radius:9px;font-size:13.5px;opacity:0;transition:all .3s;pointer-events:none;z-index:9999;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#9ca3af}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  #sidebar{display:none}
+  #ph,#filter-bar,#page-content{padding-left:16px;padding-right:16px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  #goals-view.active{grid-template-columns:1fr}
+  .person-cols{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .full{grid-column:1}
+}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 20px;color:var(--text-3)}
+.empty-ico{font-size:44px;margin-bottom:12px}
+.empty-msg{font-size:14px;line-height:1.6}
+
+/* ── INLINE EDIT ── */
+.ie{background:transparent;border:none;border-bottom:2px solid var(--accent);outline:none;font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;width:100%;padding:0}
+
+/* Column config modal */
+.col-list{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto}
+.col-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;background:var(--surface);border:1px solid transparent;cursor:grab}
+.col-row:hover{border-color:var(--border)}
+.col-row-name{flex:1;font-size:13px;font-weight:500}
+.col-toggle{position:relative;width:34px;height:18px;flex-shrink:0}
+.col-toggle input{opacity:0;width:0;height:0}
+.col-toggle .slider{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:10px;transition:.3s}
+.col-toggle .slider:before{content:'';position:absolute;width:14px;height:14px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.3s}
+.col-toggle input:checked+.slider{background:var(--accent)}
+.col-toggle input:checked+.slider:before{transform:translateX(16px)}
+.colors{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.cdot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .1s}
+.cdot:hover{transform:scale(1.25)}
+.cdot.sel{border-color:#1a1a1a}
+
+/* ── IDEAS VIEW ── */
+#ideas-view.active{display:flex;flex-direction:column;gap:24px}
+.ideas-input-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.ideas-input-head{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);padding:20px 24px;color:#fff}
+.ideas-input-head h2{font-size:20px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.ideas-input-head p{font-size:13px;opacity:.7;line-height:1.5}
+.ideas-input-body{padding:24px}
+.idea-textarea-wrap{position:relative;margin-bottom:14px}
+#idea-text{width:100%;min-height:160px;padding:16px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;line-height:1.6;resize:vertical;outline:none;color:var(--text-1);transition:border-color .2s;background:#fafafa}
+#idea-text:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+#idea-text::placeholder{color:var(--text-3);font-style:italic}
+.idea-text-mode{display:flex;gap:6px;margin-bottom:10px}
+.mode-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12.5px;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text-2);transition:all .15s;font-family:inherit;font-weight:500}
+.mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mode-btn:hover:not(.active){background:var(--surface)}
+.mic-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;font-size:13.5px;cursor:pointer;border:none;font-family:inherit;font-weight:600;transition:all .2s}
+.mic-btn.idle{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.mic-btn.idle:hover{transform:scale(1.02);box-shadow:0 4px 16px rgba(99,102,241,.4)}
+.mic-btn.recording{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;animation:pulse-mic 1.2s ease-in-out infinite}
+@keyframes pulse-mic{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 0 10px rgba(239,68,68,0)}}
+.mic-status{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:6px;margin-top:6px;min-height:18px}
+.mic-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.ideas-meta-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.idea-analyze-btn{width:100%;padding:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px}
+.idea-analyze-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,.5)}
+.idea-analyze-btn:disabled{background:#d1d5db;cursor:not-allowed;transform:none;box-shadow:none}
+.api-notice{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#92400e;margin-top:10px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.api-notice:hover{background:#fef9c3}
+
+/* ── PLAYBOOK ── */
+.playbook-wrap{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+.pb-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#f8f7ff,#eef2ff)}
+.pb-title{font-size:18px;font-weight:800;color:var(--text-1);margin-bottom:6px}
+.pb-resumo{font-size:13.5px;color:var(--text-2);line-height:1.6;max-width:680px}
+.pb-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pb-body{padding:24px;display:flex;flex-direction:column;gap:24px}
+.pb-section{background:var(--surface);border-radius:10px;padding:18px}
+.pb-section-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.pb-relevancia{font-size:13.5px;color:var(--text-2);line-height:1.7}
+
+/* Pipeline phases */
+.pipeline-wrap{display:flex;flex-direction:column;gap:12px}
+.pipeline-phase{background:#fff;border:1.5px solid var(--border);border-radius:10px;overflow:hidden}
+.pp-head{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid transparent;transition:background .15s}
+.pp-head:hover{background:var(--surface)}
+.pp-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pp-fase-name{font-weight:700;font-size:14px;flex:1}
+.pp-prazo{font-size:11.5px;color:var(--text-3);background:rgba(0,0,0,.06);padding:2px 9px;border-radius:10px}
+.pp-body{padding:14px 18px 18px;border-top:1px solid var(--border);background:#fafafa}
+.pp-desc{font-size:13.5px;color:var(--text-2);line-height:1.6;margin-bottom:12px}
+.pp-acoes{display:flex;flex-direction:column;gap:7px}
+.pp-acao{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.4}
+.pp-acao::before{content:'→';color:var(--accent);font-weight:700;flex-shrink:0;margin-top:1px}
+.pp-foot{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.pp-foot-tag{font-size:11.5px;display:flex;align-items:center;gap:5px;color:var(--text-2)}
+
+/* References */
+.ref-list{display:flex;flex-direction:column;gap:8px}
+.ref-item{display:flex;gap:12px;padding:12px;background:#fff;border-radius:8px;border:1px solid var(--border)}
+.ref-tipo{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;flex-shrink:0;align-self:flex-start;text-transform:uppercase}
+.ref-artigo{background:#dbeafe;color:#1d4ed8}
+.ref-ferramenta{background:#dcfce7;color:#15803d}
+.ref-livro{background:#f3e8ff;color:#7c3aed}
+.ref-curso{background:#fef9c3;color:#a16207}
+.ref-outro{background:#f3f4f6;color:#6b7280}
+.ref-title{font-size:13.5px;font-weight:600;margin-bottom:3px}
+.ref-desc{font-size:12.5px;color:var(--text-2);line-height:1.5}
+
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.kpi-item{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;display:flex;align-items:center;gap:8px}
+.kpi-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* Riscos */
+.risco-list{display:flex;flex-direction:column;gap:8px}
+.risco-item{padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;line-height:1.5;border-left:4px solid #f59e0b}
+.risco-label{font-weight:700;color:#92400e;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.risco-mit{color:var(--text-2);font-size:12.5px}
+
+/* Criar tarefas button */
+.pb-create-tasks{width:100%;padding:16px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.pb-create-tasks:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(16,185,129,.4)}
+
+/* Ideas list */
+.ideas-list-section{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+.ils-head{padding:16px 22px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:space-between;background:#fafafa}
+.idea-card{padding:16px 22px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;display:flex;gap:14px;align-items:flex-start}
+.idea-card:hover{background:var(--surface)}
+.idea-card:last-child{border-bottom:none}
+.idea-card-body{flex:1}
+.idea-card-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.idea-card-preview{font-size:12.5px;color:var(--text-2);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.idea-card-meta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.idea-has-pb{background:#dcfce7;color:#15803d;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.pb-loading{display:flex;flex-direction:column;align-items:center;padding:60px 20px;gap:16px;color:var(--text-2)}
+.pb-loading-spinner{width:44px;height:44px;border:4px solid #e5e7eb;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pb-loading p{font-size:14px;text-align:center;line-height:1.6}
+.pb-error{padding:24px;background:#fee2e2;border-radius:10px;color:#dc2626;font-size:13.5px;line-height:1.6}
+
+/* Settings modal */
+.api-key-field{position:relative}
+.api-key-field input{padding-right:40px}
+.api-key-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);font-size:16px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo">ID</div>
+    <div class="sb-ws">IDM Tasks<span>Instituto Despertamente</span></div>
+  </div>
+  <div class="sb-user">
+    <select id="current-user" onchange="setUser(this.value)">
+      <option value="todos">👥 Todos</option>
+      <option value="pedro">🟣 Pedro</option>
+      <option value="igor">🔵 Igor</option>
+      <option value="vinicius">🟢 Vinicius</option>
+      <option value="rodrygo">🟡 Rodrygo</option>
+    </select>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-label">Workspace</div>
+  <div class="sb-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="ico">📊</span><span class="lbl">Dashboard</span></div>
+  <div class="sb-item" onclick="nav('board')" id="nav-board"><span class="ico">📋</span><span class="lbl">Quadro Kanban</span></div>
+  <div class="sb-item" onclick="nav('table')" id="nav-table"><span class="ico">📑</span><span class="lbl">Tabela de Tarefas</span></div>
+  <div class="sb-item" onclick="nav('goals')" id="nav-goals"><span class="ico">🎯</span><span class="lbl">Metas e Objetivos</span></div>
+  <div class="sb-item" onclick="nav('ideas')" id="nav-ideas"><span class="ico">💡</span><span class="lbl">Ideias Malucas + IA</span></div>
+  <div class="sb-divider"></div>
+  <div class="sb-label">Ações Rápidas</div>
+  <div class="sb-item" onclick="openAddTask()"><span class="ico">➕</span><span class="lbl">Nova Tarefa</span></div>
+  <div class="sb-item" onclick="openColConfig()"><span class="ico">⚙️</span><span class="lbl">Configurar Colunas</span></div>
+  <div class="sb-item" onclick="openSettings()"><span class="ico">🔑</span><span class="lbl">API Key (IA)</span></div>
+  <div class="sb-item" onclick="exportData()"><span class="ico">📤</span><span class="lbl">Exportar Dados</span></div>
+  <div class="sb-footer">
+    <div class="sb-footer-info">IDM Tasks v1.0<br>Dados salvos localmente</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- PAGE HEADER -->
+  <div id="ph">
+    <div class="ph-top">
+      <div class="ph-icon" id="page-icon" onclick="pickIcon()">📊</div>
+      <input id="page-title" value="Dashboard" spellcheck="false" onblur="savePageTitle(this.value)">
+      <div class="ph-actions">
+        <button class="btn btn-primary" onclick="openAddTask()">+ Nova Tarefa</button>
+        <button class="btn btn-ghost" onclick="openColConfig()">⚙️ Configurar</button>
+      </div>
+    </div>
+    <div class="view-tabs" id="view-tabs">
+      <!-- populated by nav() -->
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div id="filter-bar">
+    <span class="filter-label">Filtrar:</span>
+    <select class="fsel" id="f-person" onchange="applyFilters()">
+      <option value="">👥 Todas as pessoas</option>
+      <option value="pedro">🟣 Pedro</option>
+      <option value="igor">🔵 Igor</option>
+      <option value="vinicius">🟢 Vinicius</option>
+      <option value="rodrygo">🟡 Rodrygo</option>
+    </select>
+    <select class="fsel" id="f-status" onchange="applyFilters()">
+      <option value="">Todos os status</option>
+      <option value="todo">A Fazer</option>
+      <option value="doing">Em Andamento</option>
+      <option value="review">Em Revisão</option>
+      <option value="done">Concluído</option>
+      <option value="blocked">Bloqueado</option>
+    </select>
+    <select class="fsel" id="f-priority" onchange="applyFilters()">
+      <option value="">Todas as prioridades</option>
+      <option value="urgente">🔴 Urgente</option>
+      <option value="alta">🟠 Alta</option>
+      <option value="media">🔵 Média</option>
+      <option value="baixa">⚪ Baixa</option>
+    </select>
+    <select class="fsel" id="f-period" onchange="applyFilters()">
+      <option value="">Todos os períodos</option>
+      <option value="diario">Diário</option>
+      <option value="semanal">Semanal</option>
+      <option value="mensal">Mensal</option>
+      <option value="projeto">Projeto</option>
+    </select>
+    <select class="fsel" id="f-area" onchange="applyFilters()">
+      <option value="">Todas as empresas</option>
+      <option value="idm">IDM</option>
+      <option value="despertamente">Despertamente</option>
+      <option value="geral">Geral</option>
+    </select>
+    <button class="btn btn-ghost" onclick="clearFilters()" style="margin-left:auto">✕ Limpar</button>
+  </div>
+
+  <!-- PAGE CONTENT -->
+  <div id="page-content">
+    <!-- DASHBOARD -->
+    <div id="dashboard-view" class="view active">
+      <!-- rendered by JS -->
+    </div>
+    <!-- BOARD -->
+    <div id="board-view" class="view">
+      <!-- rendered by JS -->
+    </div>
+    <!-- TABLE -->
+    <div id="table-view" class="view">
+      <!-- rendered by JS -->
+    </div>
+    <!-- GOALS -->
+    <div id="goals-view" class="view">
+      <!-- rendered by JS -->
+    </div>
+    <!-- IDEAS -->
+    <div id="ideas-view" class="view">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD TASK MODAL ── -->
+<div class="overlay" id="add-task-overlay">
+<div class="modal modal-lg">
+  <div class="mhead">
+    <div class="mtitle" id="modal-mode-title">➕ Nova Tarefa</div>
+    <button class="mclose" onclick="closeModal('add-task-overlay')">×</button>
+  </div>
+  <div class="mbody">
+    <div class="form-grid">
+      <div class="fgroup full">
+        <label class="flabel">Título da Tarefa *</label>
+        <input class="finput big" id="t-title" placeholder="O que precisa ser feito?" maxlength="120">
+      </div>
+      <div class="fgroup full">
+        <label class="flabel">Descrição</label>
+        <textarea class="finput" id="t-desc" placeholder="Detalhes, contexto, links relevantes..."></textarea>
+      </div>
+
+      <div class="fsec">📊 Classificação</div>
+
+      <div class="fgroup">
+        <label class="flabel">Status</label>
+        <select class="fsel" id="t-status">
+          <option value="todo">⬜ A Fazer</option>
+          <option value="doing">🔵 Em Andamento</option>
+          <option value="review">🟡 Em Revisão</option>
+          <option value="done">✅ Concluído</option>
+          <option value="blocked">🚫 Bloqueado</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Prioridade</label>
+        <select class="fsel" id="t-priority">
+          <option value="baixa">⚪ Baixa</option>
+          <option value="media" selected>🔵 Média</option>
+          <option value="alta">🟠 Alta</option>
+          <option value="urgente">🔴 Urgente</option>
+        </select>
+      </div>
+
+      <div class="fsec">👥 Atribuição & Empresa</div>
+
+      <div class="fgroup">
+        <label class="flabel">Responsável</label>
+        <select class="fsel" id="t-assignee">
+          <option value="todos">👥 Todos</option>
+          <option value="pedro">🟣 Pedro</option>
+          <option value="igor">🔵 Igor</option>
+          <option value="vinicius">🟢 Vinicius</option>
+          <option value="rodrygo">🟡 Rodrygo</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Empresa / Área</label>
+        <select class="fsel" id="t-area">
+          <option value="idm">🏛️ IDM (Instituto)</option>
+          <option value="despertamente">⚡ Despertamente</option>
+          <option value="geral">🌐 Geral</option>
+        </select>
+      </div>
+
+      <div class="fsec">🗓️ Período & Vencimento</div>
+
+      <div class="fgroup">
+        <label class="flabel">Período de Recorrência</label>
+        <select class="fsel" id="t-period">
+          <option value="diario">☀️ Diário</option>
+          <option value="semanal" selected>📅 Semanal</option>
+          <option value="mensal">🗓️ Mensal</option>
+          <option value="projeto">🚀 Projeto (único)</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Data de Vencimento</label>
+        <input class="finput" type="date" id="t-due">
+      </div>
+
+      <div class="fsec">🏷️ Categoria IDM & Tags</div>
+
+      <div class="fgroup">
+        <label class="flabel">Categoria IDM</label>
+        <select class="fsel" id="t-category">
+          <optgroup label="── Educação & Produto ──">
+            <option value="turmas">📚 Turmas / Cursos</option>
+            <option value="lives">🎥 Lives / Eventos</option>
+            <option value="conteudo">✍️ Conteúdo</option>
+            <option value="produto">🛠️ Produto / Tecnologia</option>
+          </optgroup>
+          <optgroup label="── Crescimento ──">
+            <option value="marketing">📣 Marketing Digital</option>
+            <option value="social">📱 Redes Sociais</option>
+            <option value="vendas">💰 Vendas / Comercial</option>
+            <option value="trafego">🎯 Tráfego Pago</option>
+          </optgroup>
+          <optgroup label="── Operacional ──">
+            <option value="suporte">🤝 Suporte ao Aluno</option>
+            <option value="financeiro">💳 Financeiro</option>
+            <option value="operacional">⚙️ Operacional</option>
+            <option value="estrategia">🧠 Estratégia / Pesquisa</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Tags (Enter para adicionar)</label>
+        <div class="tag-box" id="tag-box" onclick="document.getElementById('tag-in').focus()">
+          <input class="tag-in" id="tag-in" placeholder="ex: urgente, reels..." onkeydown="handleTag(event)">
+        </div>
+      </div>
+
+      <div class="idm-tip full">
+        <strong>💡 Como isso se conecta ao IDM?</strong> Categorize corretamente para gerar relatórios por área. Tarefas <em>Diárias</em> são checklist do dia; <em>Semanais</em> entram no ritual de planejamento; <em>Mensais</em> ligam-se às metas do mês. <em>Projetos</em> são iniciativas pontuais com prazo.
+      </div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <input type="hidden" id="t-editing-id">
+    <button class="btn btn-surface" onclick="closeModal('add-task-overlay')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveTask()">Salvar Tarefa</button>
+  </div>
+</div>
+</div>
+
+<!-- TASK DETAIL MODAL -->
+<div class="overlay" id="task-detail-overlay">
+<div class="modal modal-lg">
+  <div class="mhead">
+    <div class="mtitle" id="td-title-el" style="flex:1;padding-right:12px"></div>
+    <button class="mclose" onclick="closeModal('task-detail-overlay')">×</button>
+  </div>
+  <div class="mbody" id="td-body"></div>
+  <div class="mfoot">
+    <button class="btn btn-surface" onclick="editTask(currentDetailId)">✏️ Editar</button>
+    <button class="btn btn-ghost" style="color:#dc2626" onclick="deleteTask(currentDetailId)">🗑️ Excluir</button>
+    <button class="btn btn-primary" onclick="closeModal('task-detail-overlay')">Fechar</button>
+  </div>
+</div>
+</div>
+
+<!-- COL CONFIG MODAL -->
+<div class="overlay" id="col-cfg-overlay">
+<div class="modal">
+  <div class="mhead">
+    <div class="mtitle">⚙️ Configurar Colunas & Kanban</div>
+    <button class="mclose" onclick="closeModal('col-cfg-overlay')">×</button>
+  </div>
+  <div class="mbody">
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Configure as colunas do Kanban e da Tabela. Clique no nome para renomear.</p>
+    <div style="font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Colunas do Kanban</div>
+    <div id="kanban-col-list" class="col-list"></div>
+    <div style="margin-top:16px;font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Colunas da Tabela</div>
+    <div id="table-col-list" class="col-list"></div>
+    <div style="margin-top:14px">
+      <button class="btn btn-primary" onclick="addKanbanCol()">+ Nova Coluna Kanban</button>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-primary" onclick="saveColConfig()">Salvar Configurações</button>
+  </div>
+</div>
+</div>
+
+<!-- ADD GOAL INLINE uses modal-like approach within the panel -->
+
+<!-- SETTINGS MODAL (API KEY) -->
+<div class="overlay" id="settings-overlay">
+<div class="modal">
+  <div class="mhead">
+    <div class="mtitle">🔑 Configurar API Key da IA</div>
+    <button class="mclose" onclick="closeModal('settings-overlay')">×</button>
+  </div>
+  <div class="mbody">
+    <div class="idm-tip" style="margin-bottom:16px">
+      <strong>Para usar o Agente de Ideias Malucas</strong>, você precisa de uma chave da API da Anthropic (Claude).<br>
+      <a href="https://console.anthropic.com/" target="_blank" style="color:var(--accent)">→ Criar conta e pegar sua API Key em console.anthropic.com</a><br>
+      A chave fica salva <strong>somente neste navegador</strong>. Nunca é enviada para nenhum servidor além da Anthropic.
+    </div>
+    <div class="fgroup">
+      <label class="flabel">Anthropic API Key</label>
+      <div class="api-key-field">
+        <input class="finput" type="password" id="api-key-input" placeholder="sk-ant-api03-...">
+        <button class="api-key-toggle" onclick="toggleApiKeyVisibility()" id="api-key-eye">👁️</button>
+      </div>
+    </div>
+    <div id="api-key-status" style="font-size:12.5px;color:var(--text-3);margin-top:8px"></div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-surface" onclick="closeModal('settings-overlay')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveApiKey()">Salvar API Key</button>
+  </div>
+</div>
+</div>
+
+<!-- PLAYBOOK FULL VIEW MODAL -->
+<div class="overlay" id="playbook-overlay">
+<div class="modal" style="width:800px;max-width:96vw">
+  <div class="mhead">
+    <div class="mtitle">📋 Playbook Completo</div>
+    <button class="mclose" onclick="closeModal('playbook-overlay')">×</button>
+  </div>
+  <div class="mbody" id="playbook-modal-body"></div>
+  <div class="mfoot">
+    <button class="btn btn-surface" onclick="closeModal('playbook-overlay')">Fechar</button>
+  </div>
+</div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx">
+  <div class="ctx-item" onclick="ctxEdit()">✏️ Editar</div>
+  <div class="ctx-item" onclick="ctxDetail()">🔍 Ver detalhes</div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item" onclick="ctxDuplicate()">📋 Duplicar</div>
+  <div class="ctx-item" onclick="ctxMarkDone()">✅ Marcar como concluído</div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item danger" onclick="ctxDelete()">🗑️ Excluir</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'idm_tasks_v1';
+
+const DEFAULT_STATE = {
+  currentPage: 'dashboard',
+  currentView: 'board',
+  currentUser: 'todos',
+  tasks: [
+    {id:'t1',title:'Preparar material da Turma 31',desc:'Slides, planilhas e roteiro das aulas',status:'doing',priority:'alta',assignee:'pedro',area:'idm',category:'turmas',period:'semanal',due:'2026-04-18',tags:['turma31','conteudo'],createdAt:Date.now()-86400000*2},
+    {id:'t2',title:'Criar posts para Instagram — semana IDM',desc:'5 posts para o feed + 3 stories',status:'todo',priority:'media',assignee:'vinicius',area:'idm',category:'social',period:'semanal',due:'2026-04-17',tags:['instagram','design'],createdAt:Date.now()-86400000},
+    {id:'t3',title:'Revisar funil de vendas do curso',desc:'Testar cada etapa do funil e corrigir',status:'review',priority:'urgente',assignee:'igor',area:'despertamente',category:'vendas',period:'projeto',due:'2026-04-14',tags:['funnel','vendas'],createdAt:Date.now()-86400000*3},
+    {id:'t4',title:'Live de lançamento da turma',desc:'Roteiro, cenário e promoção',status:'todo',priority:'alta',assignee:'pedro',area:'idm',category:'lives',period:'mensal',due:'2026-05-02',tags:['live','lancamento'],createdAt:Date.now()-3600000*5},
+    {id:'t5',title:'Atualizar planilha financeira',desc:'Receitas e despesas de março',status:'done',priority:'media',assignee:'rodrygo',area:'geral',category:'financeiro',period:'mensal',due:'2026-04-10',tags:['financas'],createdAt:Date.now()-86400000*5},
+    {id:'t6',title:'Responder chamados de suporte',desc:'Responder tickets pendentes no grupo',status:'doing',priority:'alta',assignee:'vinicius',area:'idm',category:'suporte',period:'diario',due:'2026-04-13',tags:['suporte','alunos'],createdAt:Date.now()-3600000},
+    {id:'t7',title:'Tráfego pago — análise de campanha',desc:'Revisar métricas e ajustar criativos',status:'todo',priority:'alta',assignee:'igor',area:'despertamente',category:'trafego',period:'semanal',due:'2026-04-16',tags:['ads','facebook'],createdAt:Date.now()-86400000*1},
+  ],
+  boardColumns: [
+    {id:'todo',name:'A Fazer',color:'#6b7280'},
+    {id:'doing',name:'Em Andamento',color:'#3b82f6'},
+    {id:'review',name:'Em Revisão',color:'#f59e0b'},
+    {id:'done',name:'Concluído',color:'#10b981'},
+    {id:'blocked',name:'Bloqueado',color:'#ef4444'},
+  ],
+  tableColumns: [
+    {id:'title',name:'Título',type:'title',visible:true},
+    {id:'status',name:'Status',type:'status',visible:true},
+    {id:'assignee',name:'Responsável',type:'person',visible:true},
+    {id:'priority',name:'Prioridade',type:'priority',visible:true},
+    {id:'area',name:'Empresa',type:'area',visible:true},
+    {id:'category',name:'Categoria',type:'category',visible:true},
+    {id:'period',name:'Período',type:'period',visible:true},
+    {id:'due',name:'Vencimento',type:'date',visible:true},
+    {id:'tags',name:'Tags',type:'tags',visible:false},
+  ],
+  goals: {
+    daily:[
+      {id:'g1',text:'Responder e-mails e mensagens',done:false},
+      {id:'g2',text:'Postar story no Instagram IDM',done:true},
+      {id:'g3',text:'Revisar chamados de suporte',done:false},
+    ],
+    weekly:[
+      {id:'g4',text:'Fechar relatório de vendas da semana',done:false},
+      {id:'g5',text:'Realizar reunião de alinhamento (equipe)',done:false},
+      {id:'g6',text:'Produzir conteúdo da semana',done:true},
+      {id:'g7',text:'Atualizar quadro de tarefas',done:false},
+    ],
+    monthly:[
+      {id:'g8',text:'Lançar a Turma 31 do Curso',done:false},
+      {id:'g9',text:'Bater meta de R$ 20k em vendas',done:false},
+      {id:'g10',text:'Crescer 500 seguidores no Instagram',done:false},
+      {id:'g11',text:'Publicar 4 vídeos no YouTube',done:false},
+    ],
+  },
+  pageIcons: {dashboard:'📊',board:'📋',table:'📑',goals:'🎯',ideas:'💡'},
+  pageTitles: {dashboard:'Dashboard',board:'Quadro Kanban',table:'Tabela de Tarefas',goals:'Metas e Objetivos',ideas:'Ideias Malucas + IA'},
+};
+
+let state = loadState();
+let filters = {person:'',status:'',priority:'',period:'',area:''};
+let currentTags = [];
+let currentDetailId = null;
+let ctxTaskId = null;
+let dragTaskId = null;
+
+function loadState(){
+  try{
+    const s = localStorage.getItem(STORAGE_KEY);
+    if(s){
+      const parsed = JSON.parse(s);
+      // merge defaults for missing keys
+      return {...DEFAULT_STATE, ...parsed,
+        goals: parsed.goals || DEFAULT_STATE.goals,
+        boardColumns: parsed.boardColumns || DEFAULT_STATE.boardColumns,
+        tableColumns: parsed.tableColumns || DEFAULT_STATE.tableColumns,
+        pageIcons: {...DEFAULT_STATE.pageIcons, ...(parsed.pageIcons||{})},
+        pageTitles: {...DEFAULT_STATE.pageTitles, ...(parsed.pageTitles||{})},
+        ideas: parsed.ideas || [],
+      };
+    }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────────────────────
+const PAGE_VIEWS = {
+  dashboard: ['board','table'],
+  board: ['board','table'],
+  table: ['board','table'],
+  goals: [],
+};
+const PAGE_VIEW_LABELS = {board:'📋 Quadro',table:'📑 Tabela'};
+
+function nav(page){
+  state.currentPage = page;
+  if(page === 'board') state.currentView = 'board';
+  if(page === 'table') state.currentView = 'table';
+  saveState();
+
+  // update sidebar
+  document.querySelectorAll('.sb-item').forEach(el=>{
+    el.classList.toggle('active', el.id === 'nav-'+page || (page==='board'&&el.id==='nav-board') || (page==='table'&&el.id==='nav-table'));
+  });
+  document.getElementById('nav-'+page)?.classList.add('active');
+
+  // update page header
+  document.getElementById('page-icon').textContent = state.pageIcons[page]||'📄';
+  document.getElementById('page-title').value = state.pageTitles[page]||page;
+
+  // view tabs
+  const tabs = document.getElementById('view-tabs');
+  tabs.innerHTML = '';
+  if(page === 'board' || page === 'table'){
+    ['board','table'].forEach(v=>{
+      const t = document.createElement('div');
+      t.className = 'vtab'+(state.currentView===v?' active':'');
+      t.textContent = PAGE_VIEW_LABELS[v];
+      t.onclick = ()=>switchView(v);
+      tabs.appendChild(t);
+    });
+  }
+
+  // hide/show views
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  const showView = page==='board'||page==='table' ? page : page;
+  const targetView = document.getElementById(page+'-view');
+  if(targetView) targetView.classList.add('active');
+
+  // filter bar
+  document.getElementById('filter-bar').style.display = (page==='goals'||page==='ideas')?'none':'flex';
+
+  renderPage(page);
+}
+
+function switchView(v){
+  state.currentView = v;
+  state.currentPage = v;
+  saveState();
+  nav(v);
+}
+
+function savePageTitle(val){
+  state.pageTitles[state.currentPage] = val;
+  saveState();
+}
+
+function pickIcon(){
+  const icons = ['📊','📋','📑','🎯','🚀','⚡','🔥','💡','🏆','🎉','📌','🗓️','💰','🎥','📣','🤝','⚙️','🧠'];
+  const cur = document.getElementById('page-icon').textContent;
+  const idx = icons.indexOf(cur);
+  const next = icons[(idx+1)%icons.length];
+  document.getElementById('page-icon').textContent = next;
+  state.pageIcons[state.currentPage] = next;
+  saveState();
+}
+
+function setUser(val){
+  state.currentUser = val;
+  document.getElementById('f-person').value = val==='todos'?'':val;
+  filters.person = val==='todos'?'':val;
+  saveState();
+  renderPage(state.currentPage);
+}
+
+// ── FILTERS ────────────────────────────────────────────────────────────────
+function applyFilters(){
+  filters.person = document.getElementById('f-person').value;
+  filters.status = document.getElementById('f-status').value;
+  filters.priority = document.getElementById('f-priority').value;
+  filters.period = document.getElementById('f-period').value;
+  filters.area = document.getElementById('f-area').value;
+  renderPage(state.currentPage);
+}
+
+function clearFilters(){
+  filters = {person:'',status:'',priority:'',period:'',area:''};
+  ['f-person','f-status','f-priority','f-period','f-area'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  renderPage(state.currentPage);
+}
+
+function getFilteredTasks(){
+  return state.tasks.filter(t=>{
+    if(filters.person && t.assignee !== filters.person) return false;
+    if(filters.status && t.status !== filters.status) return false;
+    if(filters.priority && t.priority !== filters.priority) return false;
+    if(filters.period && t.period !== filters.period) return false;
+    if(filters.area && t.area !== filters.area) return false;
+    return true;
+  });
+}
+
+// ── RENDER PAGE ────────────────────────────────────────────────────────────
+function renderPage(page){
+  if(page==='dashboard') renderDashboard();
+  else if(page==='board') renderBoard();
+  else if(page==='table') renderTable();
+  else if(page==='goals') renderGoals();
+  else if(page==='ideas') renderIdeas();
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const tasks = getFilteredTasks();
+  const total = tasks.length;
+  const done = tasks.filter(t=>t.status==='done').length;
+  const doing = tasks.filter(t=>t.status==='doing').length;
+  const blocked = tasks.filter(t=>t.status==='blocked').length;
+  const urgent = tasks.filter(t=>t.priority==='urgente').length;
+  const today = new Date().toISOString().split('T')[0];
+  const overdue = tasks.filter(t=>t.due && t.due < today && t.status!=='done').length;
+
+  const el = document.getElementById('dashboard-view');
+  el.innerHTML = `
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total de Tarefas</div>
+      <div class="stat-val">${total}</div>
+      <div class="stat-sub">${done} concluídas (${total?Math.round(done/total*100):0}%)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Em Andamento</div>
+      <div class="stat-val" style="color:#2563eb">${doing}</div>
+      <div class="stat-sub">tarefas ativas agora</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Urgentes</div>
+      <div class="stat-val" style="color:#dc2626">${urgent}</div>
+      <div class="stat-sub">${blocked} bloqueadas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Vencidas</div>
+      <div class="stat-val" style="color:#ea580c">${overdue}</div>
+      <div class="stat-sub">passaram do prazo</div>
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <div class="ds-head">👥 Tarefas por Pessoa <button class="btn btn-ghost" onclick="openAddTask()" style="font-size:12px;padding:4px 10px">+ Nova</button></div>
+    <div class="person-cols">
+      ${['pedro','igor','vinicius','rodrygo'].map(p=>{
+        const pts = tasks.filter(t=>t.assignee===p);
+        return `<div class="p-col">
+          <div class="p-col-head">
+            <div class="avatar av-${p}">${p[0].toUpperCase()}</div>
+            <div class="p-col-name">${capitalize(p)}</div>
+            <span style="font-size:11px;color:var(--text-3)">${pts.length}</span>
+          </div>
+          ${pts.length===0?'<div style="font-size:12px;color:var(--text-3);padding:6px 0">Sem tarefas</div>':''}
+          ${pts.slice(0,5).map(t=>`
+          <div class="p-task-item" onclick="showDetail('${t.id}')">
+            <span class="sbadge s-${t.status}" style="font-size:10px;padding:1px 6px">${statusLabel(t.status)}</span>
+            <span style="font-size:12.5px;line-height:1.3;flex:1">${esc(t.title)}</span>
+          </div>`).join('')}
+          ${pts.length>5?`<div style="font-size:11px;color:var(--text-3);padding:4px 8px">+${pts.length-5} mais</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <div class="ds-head">📊 Por Categoria IDM</div>
+    <div style="padding:14px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+      ${getCategoryStats(tasks)}
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <div class="ds-head">🕐 Tarefas Recentes</div>
+    <div class="recent-list">
+      ${tasks.slice().sort((a,b)=>b.createdAt-a.createdAt).slice(0,8).map(t=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="showDetail('${t.id}')">
+        <div class="avatar av-${t.assignee}" style="width:24px;height:24px;font-size:10px">${t.assignee[0].toUpperCase()}</div>
+        <div style="flex:1;font-size:13.5px">${esc(t.title)}</div>
+        <span class="sbadge s-${t.status}" style="font-size:11px">${statusLabel(t.status)}</span>
+        <span class="pbadge p-${t.priority}" style="font-size:10px">${priorityLabel(t.priority)}</span>
+        ${t.due?`<span style="font-size:11px;color:${t.due<today&&t.status!=='done'?'#dc2626':'var(--text-3)'}">📅 ${formatDate(t.due)}</span>`:''}
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function getCategoryStats(tasks){
+  const cats = {};
+  tasks.forEach(t=>{if(t.category) cats[t.category]=(cats[t.category]||0)+1});
+  const catLabels = {turmas:'📚 Turmas',lives:'🎥 Lives',conteudo:'✍️ Conteúdo',produto:'🛠️ Produto',marketing:'📣 Marketing',social:'📱 Social',vendas:'💰 Vendas',trafego:'🎯 Tráfego',suporte:'🤝 Suporte',financeiro:'💳 Financeiro',operacional:'⚙️ Operacional',estrategia:'🧠 Estratégia'};
+  return Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>`
+  <div style="padding:10px 14px;background:var(--surface);border-radius:8px;font-size:12.5px">
+    <div style="font-weight:600;margin-bottom:4px">${catLabels[k]||k}</div>
+    <div style="font-size:22px;font-weight:800;color:var(--accent)">${v}</div>
+    <div style="font-size:11px;color:var(--text-3)">tarefas</div>
+  </div>`).join('');
+}
+
+// ── BOARD ──────────────────────────────────────────────────────────────────
+function renderBoard(){
+  const el = document.getElementById('board-view');
+  const tasks = getFilteredTasks();
+  el.innerHTML = '';
+
+  state.boardColumns.forEach(col=>{
+    const colTasks = tasks.filter(t=>t.status===col.id);
+    const div = document.createElement('div');
+    div.className = 'board-col';
+    div.dataset.colId = col.id;
+    div.innerHTML = `
+    <div class="bcol-head">
+      <div class="bcol-dot" style="background:${col.color}"></div>
+      <div class="bcol-title" id="bct-${col.id}">${esc(col.name)}</div>
+      <div class="bcol-count">${colTasks.length}</div>
+      <div class="bcol-menu" onclick="colMenu(event,'${col.id}')">···</div>
+    </div>
+    <div class="board-cards" id="col-cards-${col.id}">
+      ${colTasks.map(t=>cardHTML(t)).join('')}
+      ${colTasks.length===0?`<div style="text-align:center;padding:20px 0;color:var(--text-3);font-size:12.5px">Solte aqui</div>`:''}
+    </div>
+    <button class="add-card-btn" onclick="quickAdd('${col.id}')">+ Adicionar tarefa</button>`;
+    el.appendChild(div);
+    setupDrop(div, col.id);
+  });
+
+  // Add column button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-col-btn';
+  addBtn.innerHTML = '+ Nova Coluna';
+  addBtn.onclick = addKanbanCol;
+  el.appendChild(addBtn);
+
+  // Wire up drag on cards
+  document.querySelectorAll('.task-card').forEach(card=>{
+    card.draggable = true;
+    card.addEventListener('dragstart', e=>{
+      dragTaskId = card.dataset.taskId;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend', ()=>card.classList.remove('dragging'));
+    card.addEventListener('contextmenu', e=>{
+      e.preventDefault();
+      showCtx(e, card.dataset.taskId);
+    });
+  });
+}
+
+function cardHTML(t){
+  const today = new Date().toISOString().split('T')[0];
+  const isOverdue = t.due && t.due < today && t.status!=='done';
+  return `<div class="task-card" data-task-id="${t.id}" onclick="showDetail('${t.id}')">
+  <div class="card-head">
+    <div class="card-title">${esc(t.title)}</div>
+    <div class="pbadge p-${t.priority}">${priorityLabel(t.priority)}</div>
+  </div>
+  ${t.tags&&t.tags.length?`<div class="card-tags">${t.tags.slice(0,3).map(tg=>`<span class="card-tag">#${esc(tg)}</span>`).join('')}</div>`:''}
+  <div class="card-tags">
+    <span class="card-period per-${t.period}">${periodLabel(t.period)}</span>
+    ${t.area?`<span class="card-area">${areaLabel(t.area)}</span>`:''}
+  </div>
+  <div class="card-foot">
+    <div class="avatar av-${t.assignee}" title="${capitalize(t.assignee)}">${t.assignee[0].toUpperCase()}</div>
+    ${t.due?`<div class="card-due${isOverdue?' overdue':''}">📅 ${formatDate(t.due)}</div>`:''}
+  </div>
+</div>`;
+}
+
+function setupDrop(colEl, colId){
+  colEl.addEventListener('dragover', e=>{
+    e.preventDefault();
+    colEl.classList.add('drag-over');
+  });
+  colEl.addEventListener('dragleave', ()=>colEl.classList.remove('drag-over'));
+  colEl.addEventListener('drop', e=>{
+    e.preventDefault();
+    colEl.classList.remove('drag-over');
+    if(dragTaskId){
+      const task = state.tasks.find(t=>t.id===dragTaskId);
+      if(task && task.status !== colId){
+        task.status = colId;
+        saveState();
+        toast(`Movido para "${state.boardColumns.find(c=>c.id===colId)?.name||colId}"`);
+        renderBoard();
+      }
+    }
+    dragTaskId = null;
+  });
+}
+
+function quickAdd(status){
+  openAddTask();
+  setTimeout(()=>{
+    document.getElementById('t-status').value = status;
+  },50);
+}
+
+// ── TABLE ──────────────────────────────────────────────────────────────────
+function renderTable(){
+  const el = document.getElementById('table-view');
+  const tasks = getFilteredTasks();
+  const cols = state.tableColumns.filter(c=>c.visible);
+
+  el.innerHTML = `<div class="tbl-wrap">
+  <table class="dtable">
+    <thead><tr>
+      ${cols.map(c=>`<th><div class="th-inner"><span>${esc(c.name)}</span></div></th>`).join('')}
+      <th style="width:60px"></th>
+    </tr></thead>
+    <tbody id="tbl-body">
+      ${tasks.length===0?`<tr><td colspan="${cols.length+1}" style="text-align:center;padding:40px;color:var(--text-3)">Nenhuma tarefa encontrada. <button class="btn btn-primary" onclick="openAddTask()" style="margin-left:12px">+ Criar tarefa</button></td></tr>`:''}
+      ${tasks.map(t=>tableRowHTML(t, cols)).join('')}
+    </tbody>
+  </table>
+  <button class="add-row" onclick="openAddTask()">+ Nova tarefa</button>
+  </div>`;
+}
+
+function tableRowHTML(t, cols){
+  const today = new Date().toISOString().split('T')[0];
+  return `<tr data-task-id="${t.id}">
+  ${cols.map(c=>{ return `<td>${cellHTML(t, c)}</td>`}).join('')}
+  <td><div class="row-acts">
+    <button class="row-btn" onclick="showDetail('${t.id}')" title="Ver">🔍</button>
+    <button class="row-btn" onclick="editTask('${t.id}')" title="Editar">✏️</button>
+    <button class="row-btn" onclick="deleteTask('${t.id}')" title="Excluir" style="color:#dc2626">🗑️</button>
+  </div></td>
+</tr>`;
+}
+
+function cellHTML(t, col){
+  switch(col.type){
+    case 'title': return `<div style="font-weight:500;cursor:pointer" onclick="showDetail('${t.id}')">${esc(t.title)}</div>`;
+    case 'status': return `<div class="sbadge s-${t.status}" onclick="cycleStatus('${t.id}')" title="Clique para mudar">${statusLabel(t.status)}</div>`;
+    case 'person': return `<div class="person-badge"><div class="avatar av-${t.assignee}" style="width:22px;height:22px;font-size:10px">${t.assignee[0].toUpperCase()}</div>${capitalize(t.assignee)}</div>`;
+    case 'priority': return `<span class="pbadge p-${t.priority}">${priorityLabel(t.priority)}</span>`;
+    case 'area': return `<span style="font-size:12px">${areaLabel(t.area)}</span>`;
+    case 'category': return `<span style="font-size:12.5px">${catLabel(t.category)}</span>`;
+    case 'period': return `<span class="card-period per-${t.period}">${periodLabel(t.period)}</span>`;
+    case 'date': {
+      const today = new Date().toISOString().split('T')[0];
+      const over = t.due && t.due<today && t.status!=='done';
+      return t.due?`<span style="font-size:12.5px;color:${over?'#dc2626':'var(--text-1)'}">${formatDate(t.due)}</span>`:`<span style="color:var(--text-3)">—</span>`;
+    }
+    case 'tags': return t.tags&&t.tags.length?t.tags.map(tg=>`<span class="card-tag" style="font-size:11px;margin-right:3px">#${esc(tg)}</span>`).join(''):`<span style="color:var(--text-3)">—</span>`;
+    default: return `<span>${esc(t[col.id])||'—'}</span>`;
+  }
+}
+
+function cycleStatus(id){
+  const order = ['todo','doing','review','done','blocked'];
+  const task = state.tasks.find(t=>t.id===id);
+  if(!task) return;
+  const idx = order.indexOf(task.status);
+  task.status = order[(idx+1)%order.length];
+  saveState();
+  renderTable();
+  toast('Status atualizado');
+}
+
+// ── GOALS ──────────────────────────────────────────────────────────────────
+function renderGoals(){
+  const el = document.getElementById('goals-view');
+  const panels = [
+    {key:'daily',label:'☀️ Metas Diárias',color:'#d97706'},
+    {key:'weekly',label:'📅 Metas Semanais',color:'#0369a1'},
+    {key:'monthly',label:'🗓️ Metas Mensais',color:'#7c3aed'},
+  ];
+  el.innerHTML = panels.map(p=>goalPanelHTML(p)).join('');
+}
+
+function goalPanelHTML(p){
+  const goals = state.goals[p.key]||[];
+  const done = goals.filter(g=>g.done).length;
+  const pct = goals.length?Math.round(done/goals.length*100):0;
+  return `<div class="goals-panel">
+  <div class="gp-head">
+    <div class="gp-title" style="color:${p.color}">${p.label}</div>
+    <div class="gp-count">${done}/${goals.length} concluídas</div>
+  </div>
+  <div class="goal-prog"><div class="goal-prog-fill" style="width:${pct}%;background:${p.color}"></div></div>
+  <div class="gp-body">
+    ${goals.map(g=>`
+    <div class="goal-item" data-goal-id="${g.id}" data-period="${p.key}">
+      <div class="gcheck${g.done?' done':''}" onclick="toggleGoal('${p.key}','${g.id}')">${g.done?'✓':''}</div>
+      <div class="gtext${g.done?' done':''}" contenteditable="true" onblur="saveGoalText('${p.key}','${g.id}',this.textContent)">${esc(g.text)}</div>
+      <div class="gdel" onclick="deleteGoal('${p.key}','${g.id}')">×</div>
+    </div>`).join('')}
+    <div class="gadd-row" onclick="addGoalInline('${p.key}')">
+      <span>+</span> <input class="gadd-input" id="gadd-${p.key}" placeholder="Adicionar meta..." onkeydown="if(event.key==='Enter')saveGoalInline('${p.key}')">
+    </div>
+  </div>
+</div>`;
+}
+
+function toggleGoal(period, id){
+  const goal = state.goals[period].find(g=>g.id===id);
+  if(goal){ goal.done = !goal.done; saveState(); renderGoals(); }
+}
+
+function saveGoalText(period, id, text){
+  const goal = state.goals[period].find(g=>g.id===id);
+  if(goal){ goal.text = text.trim(); saveState(); }
+}
+
+function deleteGoal(period, id){
+  state.goals[period] = state.goals[period].filter(g=>g.id!==id);
+  saveState(); renderGoals(); toast('Meta removida');
+}
+
+function addGoalInline(period){
+  document.getElementById('gadd-'+period)?.focus();
+}
+
+function saveGoalInline(period){
+  const input = document.getElementById('gadd-'+period);
+  const text = input?.value?.trim();
+  if(!text) return;
+  state.goals[period].push({id:'g'+Date.now(),text,done:false});
+  saveState(); renderGoals();
+  toast('Meta adicionada');
+}
+
+// ── ADD/EDIT TASK ──────────────────────────────────────────────────────────
+function openAddTask(prefill){
+  currentTags = [];
+  document.getElementById('t-editing-id').value = '';
+  document.getElementById('modal-mode-title').textContent = '➕ Nova Tarefa';
+  document.getElementById('t-title').value = '';
+  document.getElementById('t-desc').value = '';
+  document.getElementById('t-status').value = prefill?.status||'todo';
+  document.getElementById('t-priority').value = 'media';
+  document.getElementById('t-assignee').value = state.currentUser!=='todos'?state.currentUser:'todos';
+  document.getElementById('t-area').value = 'idm';
+  document.getElementById('t-period').value = 'semanal';
+  document.getElementById('t-category').value = 'turmas';
+  document.getElementById('t-due').value = '';
+  renderTagBox([]);
+  openModal('add-task-overlay');
+  setTimeout(()=>document.getElementById('t-title').focus(),80);
+}
+
+function editTask(id){
+  closeModal('task-detail-overlay');
+  const t = state.tasks.find(t=>t.id===id);
+  if(!t) return;
+  currentTags = [...(t.tags||[])];
+  document.getElementById('t-editing-id').value = id;
+  document.getElementById('modal-mode-title').textContent = '✏️ Editar Tarefa';
+  document.getElementById('t-title').value = t.title;
+  document.getElementById('t-desc').value = t.desc||'';
+  document.getElementById('t-status').value = t.status||'todo';
+  document.getElementById('t-priority').value = t.priority||'media';
+  document.getElementById('t-assignee').value = t.assignee||'todos';
+  document.getElementById('t-area').value = t.area||'idm';
+  document.getElementById('t-period').value = t.period||'semanal';
+  document.getElementById('t-category').value = t.category||'turmas';
+  document.getElementById('t-due').value = t.due||'';
+  renderTagBox(currentTags);
+  openModal('add-task-overlay');
+}
+
+function saveTask(){
+  const title = document.getElementById('t-title').value.trim();
+  if(!title){ toast('⚠️ Informe o título da tarefa'); document.getElementById('t-title').focus(); return; }
+  const editId = document.getElementById('t-editing-id').value;
+  const data = {
+    title,
+    desc: document.getElementById('t-desc').value.trim(),
+    status: document.getElementById('t-status').value,
+    priority: document.getElementById('t-priority').value,
+    assignee: document.getElementById('t-assignee').value,
+    area: document.getElementById('t-area').value,
+    period: document.getElementById('t-period').value,
+    category: document.getElementById('t-category').value,
+    due: document.getElementById('t-due').value||null,
+    tags: [...currentTags],
+  };
+  if(editId){
+    const idx = state.tasks.findIndex(t=>t.id===editId);
+    if(idx>=0){ state.tasks[idx] = {...state.tasks[idx], ...data}; }
+    toast('✅ Tarefa atualizada!');
+  } else {
+    state.tasks.unshift({id:'t'+Date.now(), ...data, createdAt:Date.now()});
+    toast('✅ Tarefa criada!');
+  }
+  saveState();
+  closeModal('add-task-overlay');
+  renderPage(state.currentPage);
+}
+
+function deleteTask(id){
+  closeModal('task-detail-overlay');
+  if(!confirm('Excluir esta tarefa?')) return;
+  state.tasks = state.tasks.filter(t=>t.id!==id);
+  saveState();
+  renderPage(state.currentPage);
+  toast('Tarefa excluída');
+}
+
+// ── TASK DETAIL ────────────────────────────────────────────────────────────
+function showDetail(id){
+  const t = state.tasks.find(t=>t.id===id);
+  if(!t) return;
+  currentDetailId = id;
+  const today = new Date().toISOString().split('T')[0];
+  const isOverdue = t.due && t.due < today && t.status!=='done';
+  document.getElementById('td-title-el').textContent = t.title;
+  document.getElementById('td-body').innerHTML = `
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 24px">
+    <div><div class="flabel" style="margin-bottom:4px">Status</div><div class="sbadge s-${t.status}">${statusLabel(t.status)}</div></div>
+    <div><div class="flabel" style="margin-bottom:4px">Prioridade</div><div class="pbadge p-${t.priority}">${priorityLabel(t.priority)}</div></div>
+    <div><div class="flabel" style="margin-bottom:4px">Responsável</div><div style="display:flex;align-items:center;gap:7px"><div class="avatar av-${t.assignee}">${t.assignee[0].toUpperCase()}</div>${capitalize(t.assignee)}</div></div>
+    <div><div class="flabel" style="margin-bottom:4px">Empresa</div><div style="font-size:13.5px">${areaLabel(t.area)}</div></div>
+    <div><div class="flabel" style="margin-bottom:4px">Categoria</div><div style="font-size:13.5px">${catLabel(t.category)}</div></div>
+    <div><div class="flabel" style="margin-bottom:4px">Período</div><span class="card-period per-${t.period}">${periodLabel(t.period)}</span></div>
+    ${t.due?`<div><div class="flabel" style="margin-bottom:4px">Vencimento</div><div style="font-size:13.5px;color:${isOverdue?'#dc2626':'inherit'}">${isOverdue?'⚠️ ':''} ${formatDate(t.due)}</div></div>`:''}
+    ${t.tags&&t.tags.length?`<div style="grid-column:1/-1"><div class="flabel" style="margin-bottom:6px">Tags</div><div style="display:flex;gap:5px;flex-wrap:wrap">${t.tags.map(tg=>`<span class="tag-pill">#${esc(tg)}</span>`).join('')}</div></div>`:''}
+    ${t.desc?`<div style="grid-column:1/-1"><div class="flabel" style="margin-bottom:6px">Descrição</div><div style="font-size:13.5px;line-height:1.6;color:var(--text-2);white-space:pre-wrap">${esc(t.desc)}</div></div>`:''}
+  </div>`;
+  openModal('task-detail-overlay');
+}
+
+// ── TAGS ───────────────────────────────────────────────────────────────────
+function handleTag(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const val = e.target.value.replace(',','').trim().toLowerCase().replace(/\s+/g,'-');
+    if(val && !currentTags.includes(val)){
+      currentTags.push(val);
+      renderTagBox(currentTags);
+    }
+    e.target.value='';
+  } else if(e.key==='Backspace' && !e.target.value && currentTags.length){
+    currentTags.pop();
+    renderTagBox(currentTags);
+  }
+}
+
+function renderTagBox(tags){
+  currentTags = tags;
+  const box = document.getElementById('tag-box');
+  if(!box) return;
+  box.innerHTML = '';
+  tags.forEach((tg,i)=>{
+    const pill = document.createElement('span');
+    pill.className = 'tag-pill';
+    pill.innerHTML = `#${esc(tg)}<span class="tag-x" onclick="removeTag(${i})">×</span>`;
+    box.appendChild(pill);
+  });
+  const inp = document.createElement('input');
+  inp.className = 'tag-in';
+  inp.id = 'tag-in';
+  inp.placeholder = tags.length?'':'ex: urgente, reels...';
+  inp.onkeydown = handleTag;
+  box.appendChild(inp);
+}
+
+function removeTag(idx){
+  currentTags.splice(idx,1);
+  renderTagBox(currentTags);
+}
+
+// ── COLUMN CONFIG ──────────────────────────────────────────────────────────
+function openColConfig(){
+  renderKanbanColList();
+  renderTableColList();
+  openModal('col-cfg-overlay');
+}
+
+function renderKanbanColList(){
+  const el = document.getElementById('kanban-col-list');
+  const COLORS = ['#6b7280','#3b82f6','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+  el.innerHTML = state.boardColumns.map(c=>`
+  <div class="col-row" data-col-id="${c.id}">
+    <div class="bcol-dot" style="background:${c.color};width:14px;height:14px;border-radius:50%;flex-shrink:0"></div>
+    <input class="col-row-name finput" style="padding:4px 8px;margin:0" value="${esc(c.name)}" onchange="updateKanbanColName('${c.id}',this.value)">
+    <div style="display:flex;gap:4px">
+      ${COLORS.map(clr=>`<div class="cdot${c.color===clr?' sel':''}" style="background:${clr};width:16px;height:16px" onclick="updateKanbanColColor('${c.id}','${clr}',this)"></div>`).join('')}
+    </div>
+    ${state.boardColumns.length>2?`<button class="row-btn" onclick="removeKanbanCol('${c.id}')" style="color:#dc2626;margin-left:auto">🗑️</button>`:''}
+  </div>`).join('');
+}
+
+function renderTableColList(){
+  const el = document.getElementById('table-col-list');
+  el.innerHTML = state.tableColumns.map(c=>`
+  <div class="col-row">
+    <input class="col-row-name finput" style="padding:4px 8px;margin:0" value="${esc(c.name)}" ${c.id==='title'?'disabled':''} onchange="updateTableColName('${c.id}',this.value)">
+    <label class="col-toggle"><input type="checkbox" ${c.visible?'checked':''} onchange="toggleTableCol('${c.id}',this.checked)"><span class="slider"></span></label>
+  </div>`).join('');
+}
+
+function updateKanbanColName(id, name){
+  const col = state.boardColumns.find(c=>c.id===id);
+  if(col) col.name=name.trim();
+}
+
+function updateKanbanColColor(id, color, el){
+  const col = state.boardColumns.find(c=>c.id===id);
+  if(col){ col.color=color; el.closest('.col-row').querySelector('.bcol-dot').style.background=color; el.closest('[style*="gap:4px"]').querySelectorAll('.cdot').forEach(d=>d.classList.remove('sel')); el.classList.add('sel'); }
+}
+
+function removeKanbanCol(id){
+  if(state.boardColumns.length<=2){toast('Mínimo 2 colunas');return;}
+  state.boardColumns = state.boardColumns.filter(c=>c.id!==id);
+  renderKanbanColList();
+}
+
+function addKanbanCol(){
+  const id = 'col_'+Date.now();
+  state.boardColumns.push({id,name:'Nova Coluna',color:'#8b5cf6'});
+  saveState();
+  if(document.getElementById('col-cfg-overlay').classList.contains('open')) renderKanbanColList();
+  else{ nav('board'); toast('Nova coluna adicionada'); }
+}
+
+function updateTableColName(id, name){
+  const col = state.tableColumns.find(c=>c.id===id);
+  if(col) col.name=name.trim();
+}
+
+function toggleTableCol(id, visible){
+  const col = state.tableColumns.find(c=>c.id===id);
+  if(col) col.visible=visible;
+}
+
+function saveColConfig(){
+  saveState();
+  closeModal('col-cfg-overlay');
+  renderPage(state.currentPage);
+  toast('Configurações salvas!');
+}
+
+// ── CONTEXT MENU ───────────────────────────────────────────────────────────
+function showCtx(e, taskId){
+  ctxTaskId = taskId;
+  const ctx = document.getElementById('ctx');
+  ctx.style.left = Math.min(e.clientX, window.innerWidth-180)+'px';
+  ctx.style.top = Math.min(e.clientY, window.innerHeight-200)+'px';
+  ctx.classList.add('open');
+}
+
+function ctxEdit(){ closeCtx(); editTask(ctxTaskId); }
+function ctxDetail(){ closeCtx(); showDetail(ctxTaskId); }
+function ctxMarkDone(){
+  const t = state.tasks.find(t=>t.id===ctxTaskId);
+  if(t){ t.status='done'; saveState(); renderPage(state.currentPage); toast('✅ Marcado como concluído'); }
+  closeCtx();
+}
+function ctxDuplicate(){
+  const t = state.tasks.find(t=>t.id===ctxTaskId);
+  if(t){ const copy={...t,id:'t'+Date.now(),title:t.title+' (cópia)',createdAt:Date.now(),tags:[...(t.tags||[])]}; state.tasks.unshift(copy); saveState(); renderPage(state.currentPage); toast('Tarefa duplicada'); }
+  closeCtx();
+}
+function ctxDelete(){ closeCtx(); deleteTask(ctxTaskId); }
+function closeCtx(){ document.getElementById('ctx').classList.remove('open'); }
+
+// ── MODAL HELPERS ──────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+function exportData(){
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'idm-tasks-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+  toast('📤 Exportado com sucesso!');
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function statusLabel(s){return{todo:'A Fazer',doing:'Em Andamento',review:'Em Revisão',done:'Concluído',blocked:'Bloqueado'}[s]||s}
+function priorityLabel(p){return{baixa:'Baixa',media:'Média',alta:'Alta',urgente:'🔴 Urgente'}[p]||p}
+function periodLabel(p){return{diario:'Diário',semanal:'Semanal',mensal:'Mensal',projeto:'Projeto'}[p]||p}
+function areaLabel(a){return{idm:'🏛️ IDM',despertamente:'⚡ Despertamente',geral:'🌐 Geral'}[a]||a}
+function catLabel(c){return{turmas:'📚 Turmas',lives:'🎥 Lives',conteudo:'✍️ Conteúdo',produto:'🛠️ Produto',marketing:'📣 Marketing',social:'📱 Social',vendas:'💰 Vendas',trafego:'🎯 Tráfego',suporte:'🤝 Suporte',financeiro:'💳 Financeiro',operacional:'⚙️ Operacional',estrategia:'🧠 Estratégia'}[c]||c}
+function capitalize(s){return s?s[0].toUpperCase()+s.slice(1):''}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function formatDate(d){if(!d)return''; const [y,m,dd]=d.split('-'); return `${dd}/${m}/${y}`}
+function uid(){return 't'+Math.random().toString(36).slice(2)+Date.now()}
+
+function toast(msg, duration=2400){
+  const el = document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), duration);
+}
+
+// ── SETTINGS / API KEY ────────────────────────────────────────────────────
+function openSettings(){
+  const key = localStorage.getItem('idm_api_key')||'';
+  document.getElementById('api-key-input').value = key;
+  document.getElementById('api-key-status').textContent = key ? '✅ API Key configurada' : 'Nenhuma chave configurada ainda.';
+  openModal('settings-overlay');
+}
+
+function saveApiKey(){
+  const key = document.getElementById('api-key-input').value.trim();
+  if(!key){ toast('⚠️ Digite a API Key'); return; }
+  if(!key.startsWith('sk-ant')){ toast('⚠️ API Key parece inválida. Deve começar com sk-ant'); return; }
+  localStorage.setItem('idm_api_key', key);
+  closeModal('settings-overlay');
+  toast('🔑 API Key salva com sucesso!');
+}
+
+function toggleApiKeyVisibility(){
+  const inp = document.getElementById('api-key-input');
+  const btn = document.getElementById('api-key-eye');
+  if(inp.type==='password'){ inp.type='text'; btn.textContent='🙈'; }
+  else { inp.type='password'; btn.textContent='👁️'; }
+}
+
+function getApiKey(){ return localStorage.getItem('idm_api_key')||''; }
+
+// ── VOICE RECOGNITION ─────────────────────────────────────────────────────
+let recognition = null;
+let isRecording = false;
+let micAccumulated = '';
+
+function initVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ return null; }
+  const r = new SR();
+  r.lang = 'pt-BR';
+  r.continuous = true;
+  r.interimResults = true;
+  r.maxAlternatives = 1;
+  r.onresult = (e)=>{
+    let interim = '';
+    let final = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    if(final) micAccumulated += final + ' ';
+    const ta = document.getElementById('idea-text');
+    if(ta) ta.value = micAccumulated + interim;
+    const status = document.getElementById('mic-status-text');
+    if(status) status.textContent = interim ? `"${interim.slice(-60)}..."` : '🎤 Ouvindo... Fale sua ideia';
+  };
+  r.onerror = (e)=>{
+    stopMic();
+    if(e.error === 'not-allowed') toast('⚠️ Permissão de microfone negada. Ative nas configurações do navegador.');
+    else toast('Erro no microfone: '+e.error);
+  };
+  r.onend = ()=>{ if(isRecording) startMicInner(); };
+  return r;
+}
+
+function startMicInner(){
+  try{ recognition.start(); }catch(e){}
+}
+
+function toggleMic(){
+  if(!isRecording){ startMic(); }
+  else { stopMic(); }
+}
+
+function startMic(){
+  if(!recognition) recognition = initVoice();
+  if(!recognition){ toast('⚠️ Seu navegador não suporta voz. Use Chrome ou Edge.'); return; }
+  micAccumulated = document.getElementById('idea-text')?.value||'';
+  isRecording = true;
+  startMicInner();
+  const btn = document.getElementById('mic-btn');
+  if(btn){ btn.className='mic-btn recording'; btn.innerHTML='⏹️ Parar Gravação'; }
+  const status = document.getElementById('mic-status-text');
+  if(status) status.textContent = '🎤 Ouvindo... Fale sua ideia';
+  document.getElementById('mic-status')?.classList.remove('hide');
+}
+
+function stopMic(){
+  isRecording = false;
+  try{ recognition?.stop(); }catch(e){}
+  const btn = document.getElementById('mic-btn');
+  if(btn){ btn.className='mic-btn idle'; btn.innerHTML='🎤 Falar com Microfone'; }
+  const status = document.getElementById('mic-status-text');
+  if(status) status.textContent = '✅ Gravação finalizada';
+}
+
+// ── IDEAS STATE ────────────────────────────────────────────────────────────
+if(!state.ideas) state.ideas = [];
+
+// ── RENDER IDEAS VIEW ──────────────────────────────────────────────────────
+function renderIdeas(){
+  const el = document.getElementById('ideas-view');
+  const apiKey = getApiKey();
+  const hasKey = !!apiKey;
+
+  el.innerHTML = `
+  <div class="ideas-input-card">
+    <div class="ideas-input-head">
+      <h2>💡 Agente de Ideias Malucas</h2>
+      <p>Escreva ou fale sua ideia crua, sem filtro. A IA analisa tudo e gera um playbook completo de implementação com fases, referências e tarefas prontas para o sistema.</p>
+    </div>
+    <div class="ideas-input-body">
+      <div class="fgroup" style="margin-bottom:14px">
+        <label class="flabel">Título da Ideia</label>
+        <input class="finput big" id="idea-title" placeholder="Ex: Criar um grupo VIP de ex-alunos para vender mentoria..." maxlength="120">
+      </div>
+
+      <div class="idea-text-mode">
+        <button class="mode-btn active" id="mode-text-btn" onclick="setIdeaMode('text')">✍️ Escrever</button>
+        <button class="mode-btn" id="mode-mic-btn" onclick="setIdeaMode('mic')">🎤 Falar no Microfone</button>
+      </div>
+
+      <div class="idea-textarea-wrap">
+        <textarea id="idea-text" placeholder="Jogue tudo aqui... Pode ser um rascunho bagunçado, pensamentos soltos, contexto, o problema que você quer resolver. Quanto mais detalhe, melhor o playbook. A IA entende português natural e linguagem informal."></textarea>
+      </div>
+
+      <div id="mic-section" style="display:none;margin-bottom:14px">
+        <button class="mic-btn idle" id="mic-btn" onclick="toggleMic()">🎤 Falar com Microfone</button>
+        <div class="mic-status" id="mic-status">
+          <div class="mic-dot" style="display:none" id="mic-dot"></div>
+          <span id="mic-status-text" style="font-size:12px;color:var(--text-3)">Clique para começar a falar</span>
+        </div>
+      </div>
+
+      <div class="ideas-meta-row">
+        <div class="fgroup">
+          <label class="flabel">Urgência</label>
+          <select class="fsel" id="idea-urgency">
+            <option value="baixa">⚪ Baixa — quando der</option>
+            <option value="media" selected>🔵 Média — essa semana</option>
+            <option value="alta">🟠 Alta — hoje/amanhã</option>
+            <option value="urgente">🔴 URGENTE — agora</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Empresa</label>
+          <select class="fsel" id="idea-area">
+            <option value="idm">🏛️ IDM</option>
+            <option value="despertamente">⚡ Despertamente</option>
+            <option value="geral">🌐 Geral</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Responsável Principal</label>
+          <select class="fsel" id="idea-assignee">
+            <option value="pedro">🟣 Pedro</option>
+            <option value="igor">🔵 Igor</option>
+            <option value="vinicius">🟢 Vinicius</option>
+            <option value="rodrygo">🟡 Rodrygo</option>
+            <option value="todos">👥 Todos</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="idea-analyze-btn" onclick="analyzeIdea()" id="analyze-btn" ${!hasKey?'disabled':''}>
+        🧠 Analisar com IA e Gerar Playbook Completo
+      </button>
+      ${!hasKey?`<div class="api-notice" onclick="openSettings()">⚠️ Configure sua API Key da Anthropic para usar o Agente de IA. Clique aqui para configurar →</div>`:''}
+    </div>
+  </div>
+
+  ${state.ideas.length>0?`
+  <div class="ideas-list-section">
+    <div class="ils-head">
+      <span>🗂️ Suas Ideias (${state.ideas.length})</span>
+      <span style="font-size:12px;color:var(--text-3)">${state.ideas.filter(i=>i.playbook).length} com playbook</span>
+    </div>
+    ${state.ideas.slice().reverse().map(idea=>`
+    <div class="idea-card" onclick="viewIdeaPlaybook('${idea.id}')">
+      <div style="font-size:28px">${idea.playbook?'📋':'💭'}</div>
+      <div class="idea-card-body">
+        <div class="idea-card-title">${esc(idea.title||'Sem título')}</div>
+        <div class="idea-card-preview">${esc(idea.rawText||'').slice(0,140)}${(idea.rawText||'').length>140?'...':''}</div>
+        <div class="idea-card-meta">
+          <span class="sbadge s-${idea.urgency==='urgente'?'blocked':idea.urgency==='alta'?'doing':idea.urgency==='media'?'review':'todo'}">${priorityLabel(idea.urgency||'media')}</span>
+          <span class="card-area">${areaLabel(idea.area||'idm')}</span>
+          <div class="avatar av-${idea.assignee}" style="width:20px;height:20px;font-size:9px">${(idea.assignee||'p')[0].toUpperCase()}</div>
+          ${idea.playbook?`<span class="idea-has-pb">✅ Playbook gerado</span>`:'<span style="font-size:11px;color:var(--text-3)">Sem playbook</span>'}
+          ${idea.tasksCreated?`<span style="font-size:11px;background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:4px">${idea.tasksCreated} tarefas criadas</span>`:''}
+          <span style="font-size:11px;color:var(--text-3)">${formatDate(new Date(idea.createdAt).toISOString().split('T')[0])}</span>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`:''}`;
+
+  // Set default assignee to current user
+  const assigneeEl = document.getElementById('idea-assignee');
+  if(assigneeEl && state.currentUser!=='todos') assigneeEl.value = state.currentUser;
+}
+
+function setIdeaMode(mode){
+  const textBtn = document.getElementById('mode-text-btn');
+  const micBtn = document.getElementById('mode-mic-btn');
+  const micSection = document.getElementById('mic-section');
+  const ta = document.getElementById('idea-text');
+  if(mode==='text'){
+    textBtn.classList.add('active'); micBtn.classList.remove('active');
+    micSection.style.display='none';
+    ta.style.display='block';
+    if(isRecording) stopMic();
+  } else {
+    micBtn.classList.add('active'); textBtn.classList.remove('active');
+    micSection.style.display='block';
+    ta.style.display='block'; // keep visible to show transcription
+  }
+}
+
+// ── ANALYZE IDEA WITH CLAUDE API ───────────────────────────────────────────
+async function analyzeIdea(){
+  const title = document.getElementById('idea-title').value.trim();
+  const rawText = document.getElementById('idea-text').value.trim();
+  const urgency = document.getElementById('idea-urgency').value;
+  const area = document.getElementById('idea-area').value;
+  const assignee = document.getElementById('idea-assignee').value;
+
+  if(!rawText && !title){ toast('⚠️ Escreva ou fale sua ideia primeiro!'); return; }
+
+  const apiKey = getApiKey();
+  if(!apiKey){ openSettings(); return; }
+
+  // Save idea immediately
+  const ideaId = 'idea_'+Date.now();
+  const idea = { id:ideaId, title:title||(rawText.slice(0,60)+'...'), rawText, urgency, area, assignee, createdAt:Date.now(), playbook:null, tasksCreated:0 };
+  state.ideas.push(idea);
+  saveState();
+
+  // Show loading state
+  const el = document.getElementById('ideas-view');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'pb-loading-wrap';
+  loadingDiv.className = 'playbook-wrap';
+  loadingDiv.innerHTML = `
+  <div class="pb-loading">
+    <div class="pb-loading-spinner"></div>
+    <div><strong>Agente de IA analisando sua ideia...</strong></div>
+    <p>Gerando playbook completo com fases de implementação,<br>referências, KPIs e tarefas sugeridas</p>
+  </div>`;
+  el.appendChild(loadingDiv);
+  loadingDiv.scrollIntoView({behavior:'smooth', block:'start'});
+
+  const btn = document.getElementById('analyze-btn');
+  if(btn){ btn.disabled=true; btn.innerHTML='⏳ Analisando...'; }
+
+  const systemPrompt = `Você é um consultor estratégico especializado em negócios digitais, educação online e marketing.
+Analise a ideia do empreendedor e gere um playbook de ação completo e detalhado.
+SEMPRE responda em JSON válido, sem texto antes ou depois.
+Escreva em português brasileiro, de forma prática e direta.
+O playbook deve ser acionável e específico para o contexto de uma empresa de cursos online/educação (IDM / Instituto Despertamente).
+Contexto da empresa: Empresa de cursos online de desenvolvimento pessoal/despertar da consciência. Equipe: Pedro (estratégia/produto), Igor (tráfego/marketing), Vinicius (suporte/comunidade), Rodrygo (financeiro/operacional).`;
+
+  const userPrompt = `IDEIA DO EMPREENDEDOR:
+Título: ${title||'Não informado'}
+Texto: ${rawText}
+Urgência declarada: ${urgency}
+Empresa: ${area}
+Responsável sugerido: ${assignee}
+
+Gere um playbook completo em JSON com EXATAMENTE esta estrutura:
+{
+  "titulo": "título refinado e impactante da ideia",
+  "resumo": "resumo executivo de 2-3 linhas claro e objetivo",
+  "relevancia": "por que esta ideia é importante para o IDM agora (2-3 parágrafos)",
+  "urgencia": "${urgency}",
+  "timeline_total": "ex: 3 semanas",
+  "pipeline": [
+    {
+      "fase": "Fase 1: Nome da Fase",
+      "descricao": "o que esta fase entrega e por que é importante",
+      "acoes": ["ação específica 1", "ação específica 2", "ação específica 3"],
+      "prazo": "ex: 3 dias",
+      "responsavel_sugerido": "${assignee}"
+    }
+  ],
+  "referencias": [
+    {
+      "titulo": "Nome do recurso/referência",
+      "descricao": "por que é relevante e como usar neste contexto",
+      "tipo": "artigo|ferramenta|livro|curso"
+    }
+  ],
+  "kpis": ["KPI mensurável 1", "KPI mensurável 2", "KPI mensurável 3"],
+  "riscos": [
+    {
+      "risco": "descrição do risco",
+      "mitigacao": "como mitigar"
+    }
+  ],
+  "tasks_sugeridas": [
+    {
+      "title": "título da tarefa",
+      "priority": "baixa|media|alta|urgente",
+      "category": "turmas|lives|conteudo|produto|marketing|social|vendas|trafego|suporte|financeiro|operacional|estrategia",
+      "period": "diario|semanal|mensal|projeto",
+      "assignee": "pedro|igor|vinicius|rodrygo|todos",
+      "due_days": 7
+    }
+  ]
+}
+Gere pelo menos 4 fases no pipeline, 4 referências reais e úteis, 5+ KPIs, 3+ riscos e 5+ tarefas sugeridas.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    if(!response.ok){
+      const err = await response.json().catch(()=>({}));
+      throw new Error(err.error?.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const rawJson = data.content[0].text;
+
+    // Parse JSON (handle markdown code blocks if present)
+    let jsonStr = rawJson.trim();
+    if(jsonStr.startsWith('```')) jsonStr = jsonStr.replace(/```json?\n?/,'').replace(/```$/,'').trim();
+    const playbook = JSON.parse(jsonStr);
+
+    // Save playbook to idea
+    const ideaIdx = state.ideas.findIndex(i=>i.id===ideaId);
+    if(ideaIdx>=0){ state.ideas[ideaIdx].playbook = playbook; }
+    saveState();
+
+    // Remove loading
+    document.getElementById('pb-loading-wrap')?.remove();
+
+    // Render playbook inline
+    const pbDiv = document.createElement('div');
+    pbDiv.id = 'pb-result-'+ideaId;
+    pbDiv.innerHTML = renderPlaybookHTML(playbook, ideaId);
+    el.appendChild(pbDiv);
+    pbDiv.scrollIntoView({behavior:'smooth', block:'start'});
+
+    toast('🎉 Playbook gerado com sucesso!', 3000);
+
+    if(btn){ btn.disabled=false; btn.innerHTML='🧠 Analisar com IA e Gerar Playbook Completo'; }
+
+    renderIdeasSidebar();
+
+  } catch(err) {
+    document.getElementById('pb-loading-wrap')?.remove();
+    const errDiv = document.createElement('div');
+    errDiv.className = 'playbook-wrap';
+    errDiv.innerHTML = `<div class="pb-error">
+      <strong>❌ Erro ao chamar a IA</strong><br><br>
+      ${esc(err.message)}<br><br>
+      <strong>Possíveis causas:</strong><br>
+      • API Key inválida ou expirada → <span style="cursor:pointer;color:var(--accent);text-decoration:underline" onclick="openSettings()">Verificar API Key</span><br>
+      • Sem créditos na conta Anthropic → <a href="https://console.anthropic.com/" target="_blank" style="color:var(--accent)">console.anthropic.com</a><br>
+      • Problema de conexão ou CORS — tente no Chrome/Edge
+    </div>`;
+    el.appendChild(errDiv);
+    if(btn){ btn.disabled=false; btn.innerHTML='🧠 Analisar com IA e Gerar Playbook Completo'; }
+    toast('❌ Erro ao gerar playbook', 4000);
+  }
+}
+
+function renderPlaybookHTML(pb, ideaId){
+  const urgColors = {baixa:'s-todo',media:'s-review',alta:'s-doing',urgente:'s-blocked'};
+  const today = new Date();
+
+  return `<div class="playbook-wrap">
+  <div class="pb-header">
+    <div>
+      <div class="pb-title">📋 ${esc(pb.titulo||'Playbook')}</div>
+      <div class="pb-resumo">${esc(pb.resumo||'')}</div>
+      <div class="pb-meta">
+        <span class="sbadge ${urgColors[pb.urgencia||'media']}">${priorityLabel(pb.urgencia||'media')}</span>
+        ${pb.timeline_total?`<span style="font-size:12px;background:#f3f4f6;padding:3px 10px;border-radius:10px;color:var(--text-2)">⏱️ ${esc(pb.timeline_total)}</span>`:''}
+        <span style="font-size:12px;background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:10px">${(pb.pipeline||[]).length} fases</span>
+        <span style="font-size:12px;background:#dbeafe;color:#1d4ed8;padding:3px 10px;border-radius:10px">${(pb.tasks_sugeridas||[]).length} tarefas sugeridas</span>
+      </div>
+    </div>
+  </div>
+  <div class="pb-body">
+
+    ${pb.relevancia?`<div class="pb-section">
+      <div class="pb-section-title">🎯 Relevância para o IDM</div>
+      <div class="pb-relevancia">${esc(pb.relevancia).replace(/\n/g,'<br>')}</div>
+    </div>`:''}
+
+    <div class="pb-section">
+      <div class="pb-section-title">🚀 Pipeline de Implementação</div>
+      <div class="pipeline-wrap">
+        ${(pb.pipeline||[]).map((fase,i)=>`
+        <div class="pipeline-phase">
+          <div class="pp-head" onclick="togglePhase(this)">
+            <div class="pp-num">${i+1}</div>
+            <div class="pp-fase-name">${esc(fase.fase||`Fase ${i+1}`)}</div>
+            ${fase.prazo?`<span class="pp-prazo">⏱️ ${esc(fase.prazo)}</span>`:''}
+            <span style="color:var(--text-3);font-size:18px;margin-left:8px" class="pp-arrow">▾</span>
+          </div>
+          <div class="pp-body">
+            ${fase.descricao?`<div class="pp-desc">${esc(fase.descricao)}</div>`:''}
+            <div class="pp-acoes">
+              ${(fase.acoes||[]).map(a=>`<div class="pp-acao">${esc(a)}</div>`).join('')}
+            </div>
+            ${fase.responsavel_sugerido?`<div class="pp-foot">
+              <div class="pp-foot-tag"><div class="avatar av-${fase.responsavel_sugerido}" style="width:20px;height:20px;font-size:9px">${fase.responsavel_sugerido[0].toUpperCase()}</div> ${capitalize(fase.responsavel_sugerido)}</div>
+            </div>`:''}
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    ${pb.referencias&&pb.referencias.length?`<div class="pb-section">
+      <div class="pb-section-title">📚 Referências & Recursos</div>
+      <div class="ref-list">
+        ${pb.referencias.map(r=>`
+        <div class="ref-item">
+          <span class="ref-tipo ref-${r.tipo||'outro'}">${r.tipo||'ref'}</span>
+          <div>
+            <div class="ref-title">${esc(r.titulo||'')}</div>
+            <div class="ref-desc">${esc(r.descricao||'')}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+
+    ${pb.kpis&&pb.kpis.length?`<div class="pb-section">
+      <div class="pb-section-title">📊 KPIs para Medir o Sucesso</div>
+      <div class="kpi-grid">
+        ${pb.kpis.map(k=>`<div class="kpi-item"><div class="kpi-dot"></div>${esc(k)}</div>`).join('')}
+      </div>
+    </div>`:''}
+
+    ${pb.riscos&&pb.riscos.length?`<div class="pb-section">
+      <div class="pb-section-title">⚠️ Riscos & Mitigações</div>
+      <div class="risco-list">
+        ${pb.riscos.map(r=>`
+        <div class="risco-item">
+          <div class="risco-label">⚠️ ${esc(r.risco||'')}</div>
+          <div class="risco-mit">→ ${esc(r.mitigacao||'')}</div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+
+    ${pb.tasks_sugeridas&&pb.tasks_sugeridas.length?`<div class="pb-section">
+      <div class="pb-section-title">✅ Tarefas Sugeridas para o Sistema</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+        ${pb.tasks_sugeridas.map((t,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff;border-radius:8px;border:1px solid var(--border)">
+          <span class="pbadge p-${t.priority||'media'}">${priorityLabel(t.priority||'media')}</span>
+          <span style="font-size:13.5px;flex:1">${esc(t.title)}</span>
+          <div class="avatar av-${t.assignee||'todos'}" style="width:22px;height:22px;font-size:10px">${(t.assignee||'t')[0].toUpperCase()}</div>
+          <span class="card-period per-${t.period||'semanal'}" style="font-size:11px">${periodLabel(t.period||'semanal')}</span>
+        </div>`).join('')}
+      </div>
+      <button class="pb-create-tasks" onclick="createPlaybookTasks('${ideaId}')">
+        ✅ Criar ${pb.tasks_sugeridas.length} Tarefas no Sistema de Gestão
+      </button>
+    </div>`:''}
+
+  </div>
+</div>`;
+}
+
+function togglePhase(head){
+  const body = head.nextElementSibling;
+  const arrow = head.querySelector('.pp-arrow');
+  if(body.style.display==='none'){ body.style.display='block'; if(arrow) arrow.textContent='▾'; }
+  else { body.style.display='none'; if(arrow) arrow.textContent='▸'; }
+}
+
+function viewIdeaPlaybook(ideaId){
+  const idea = state.ideas.find(i=>i.id===ideaId);
+  if(!idea) return;
+  if(!idea.playbook){
+    toast('Esta ideia não tem playbook ainda. Abra e analise com a IA.');
+    return;
+  }
+  const body = document.getElementById('playbook-modal-body');
+  body.innerHTML = renderPlaybookHTML(idea.playbook, ideaId);
+  openModal('playbook-overlay');
+}
+
+function createPlaybookTasks(ideaId){
+  const idea = state.ideas.find(i=>i.id===ideaId);
+  if(!idea||!idea.playbook) return;
+
+  const tasks = idea.playbook.tasks_sugeridas||[];
+  const today = new Date();
+  let created = 0;
+
+  tasks.forEach(t=>{
+    const dueDate = new Date(today);
+    dueDate.setDate(dueDate.getDate()+(t.due_days||7));
+
+    state.tasks.unshift({
+      id: 'task_'+Date.now()+'_'+created,
+      title: t.title,
+      desc: `Criada automaticamente a partir do playbook: "${idea.title}"`,
+      status: 'todo',
+      priority: t.priority||'media',
+      assignee: t.assignee||idea.assignee||'todos',
+      area: idea.area||'idm',
+      category: t.category||'estrategia',
+      period: t.period||'semanal',
+      due: dueDate.toISOString().split('T')[0],
+      tags: ['playbook','ideia'],
+      createdAt: Date.now(),
+    });
+    created++;
+  });
+
+  const ideaIdx = state.ideas.findIndex(i=>i.id===ideaId);
+  if(ideaIdx>=0) state.ideas[ideaIdx].tasksCreated = created;
+  saveState();
+
+  closeModal('playbook-overlay');
+  toast(`✅ ${created} tarefas criadas no sistema!`, 3500);
+
+  // Navigate to board to see them
+  setTimeout(()=>nav('board'), 500);
+}
+
+function renderIdeasSidebar(){
+  // Nothing needed — sidebar is static
+}
+
+// ── GLOBAL EVENTS ──────────────────────────────────────────────────────────
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#ctx')) closeCtx();
+  if(e.target.classList.contains('overlay')) {
+    closeModal(e.target.id);
+  }
+});
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open')); }
+  if((e.ctrlKey||e.metaKey) && e.key==='n'){ e.preventDefault(); openAddTask(); }
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+(function init(){
+  // Set current user selector
+  document.getElementById('current-user').value = state.currentUser;
+  if(state.currentUser!=='todos') document.getElementById('f-person').value = state.currentUser;
+
+  nav(state.currentPage||'dashboard');
+
+  // Keyboard shortcut hint
+  setTimeout(()=>toast('💡 Ctrl+N para nova tarefa | Clique direito nos cards para opções'), 1200);
+})();
+</script>
+</body>
+</html>
