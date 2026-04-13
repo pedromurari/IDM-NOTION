@@ -511,7 +511,7 @@ textarea.finput{resize:vertical;min-height:76px}
   <div class="sb-item" onclick="openSettings()"><span class="ico">🔑</span><span class="lbl">API Key (IA)</span></div>
   <div class="sb-item" onclick="exportData()"><span class="ico">📤</span><span class="lbl">Exportar Dados</span></div>
   <div class="sb-footer">
-    <div class="sb-footer-info">IDM Tasks v1.0<br>Dados salvos localmente</div>
+    <div class="sb-footer-info">IDM Tasks v1.0<br><span id="sync-status">🟡 Conectando...</span></div>
   </div>
 </div>
 
@@ -831,7 +831,85 @@ textarea.finput{resize:vertical;min-height:76px}
 <!-- TOAST -->
 <div id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
 <script>
+// ── FIREBASE ───────────────────────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSqdCDWOU-kgzZsshANnRfuDjFdMzyAqw",
+  authDomain: "idm-notion.firebaseapp.com",
+  projectId: "idm-notion",
+  storageBucket: "idm-notion.firebasestorage.app",
+  messagingSenderId: "1081244315494",
+  appId: "1:1081244315494:web:b056876628c7f7b36a22a7"
+};
+let db = null;
+let fbUnsubscribe = null;
+
+function initFirebase(){
+  try {
+    const app = firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    setSyncStatus('connecting');
+
+    // Load initial data from cloud, then start listener
+    const docRef = db.collection('workspace').doc('main');
+    docRef.get().then(snap=>{
+      if(snap.exists){
+        applyCloudState(snap.data());
+        renderPage(state.currentPage);
+        setSyncStatus('ok');
+      }
+      // Start real-time listener
+      fbUnsubscribe = docRef.onSnapshot(snap=>{
+        if(!snap.exists) return;
+        // hasPendingWrites = true means WE triggered this — skip to avoid loop
+        if(snap.metadata.hasPendingWrites) return;
+        applyCloudState(snap.data());
+        renderPage(state.currentPage);
+        setSyncStatus('ok');
+        toast('🔄 Atualizado por outro usuário');
+      }, err=>{ console.warn('Firestore listener error:', err); setSyncStatus('error'); });
+    }).catch(err=>{ console.warn('Firestore get error:', err); setSyncStatus('error'); });
+  } catch(e){ console.warn('Firebase init error:', e); setSyncStatus('error'); }
+}
+
+function applyCloudState(data){
+  if(data.tasks)        state.tasks = data.tasks;
+  if(data.goals)        state.goals = data.goals;
+  if(data.boardColumns) state.boardColumns = data.boardColumns;
+  if(data.tableColumns) state.tableColumns = data.tableColumns;
+  if(data.ideas)        state.ideas = data.ideas;
+  if(data.pageIcons)    state.pageIcons = {...DEFAULT_STATE.pageIcons, ...data.pageIcons};
+  if(data.pageTitles)   state.pageTitles = {...DEFAULT_STATE.pageTitles, ...data.pageTitles};
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function cloudState(){
+  return {
+    tasks: state.tasks,
+    goals: state.goals,
+    boardColumns: state.boardColumns,
+    tableColumns: state.tableColumns,
+    ideas: state.ideas||[],
+    pageIcons: state.pageIcons,
+    pageTitles: state.pageTitles,
+    updatedAt: Date.now(),
+  };
+}
+
+function setSyncStatus(status){
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  const map = {
+    connecting: '🟡 Conectando...',
+    ok:         '🟢 Sincronizado',
+    saving:     '🔄 Salvando...',
+    error:      '🔴 Sem conexão',
+  };
+  el.textContent = map[status]||status;
+}
+
 // ── STATE ──────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'idm_tasks_v1';
 
@@ -918,6 +996,12 @@ function loadState(){
 
 function saveState(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if(db){
+    setSyncStatus('saving');
+    db.collection('workspace').doc('main').set(cloudState())
+      .then(()=>setSyncStatus('ok'))
+      .catch(e=>{ console.warn('Firestore write error:', e); setSyncStatus('error'); });
+  }
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -2642,14 +2726,15 @@ document.addEventListener('keydown', e=>{
 
 // ── INIT ───────────────────────────────────────────────────────────────────
 (function init(){
-  // Set current user selector
   document.getElementById('current-user').value = state.currentUser;
   if(state.currentUser!=='todos') document.getElementById('f-person').value = state.currentUser;
 
   nav(state.currentPage||'dashboard');
 
-  // Keyboard shortcut hint
-  setTimeout(()=>toast('💡 Ctrl+N para nova tarefa | Clique direito nos cards para opções'), 1200);
+  // Firebase sync
+  initFirebase();
+
+  setTimeout(()=>toast('💡 Ctrl+N para nova tarefa | Dados sincronizados em tempo real 🔥'), 1400);
 })();
 </script>
 </body>
